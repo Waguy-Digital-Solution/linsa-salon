@@ -11,10 +11,12 @@
    3. Nan meni goch la: Build → Firestore Database → "Create database"
       → chwazi "Start in test mode" pou kòmanse (ou ka sekirize l pi
       devan ak Firestore Security Rules)
-   4. Nan Project settings (zanno a) → "Your apps" → klike </> (Web)
+   4. Nan meni goch la tou: Build → Storage → "Get started" (pou ka
+      telechaje videyo/foto pwomosyon depi Admin → Pwomosyon)
+   5. Nan Project settings (zanno a) → "Your apps" → klike </> (Web)
       → anrejistre app la → Firebase ap ba w yon objè "firebaseConfig"
-   5. Kopye valè yo, mete yo nan FIREBASE_CONFIG anba a, epi sove.
-   6. Pouse (push) chanjman an — tou de index.html ak randevou.html
+   6. Kopye valè yo, mete yo nan FIREBASE_CONFIG anba a, epi sove.
+   7. Pouse (push) chanjman an — tou de index.html ak randevou.html
       ap otomatikman konekte ak menm baz done a.
 
    Toutotan ou pa ranpli valè yo, aplikasyon an ap kontinye fonksyone
@@ -30,6 +32,7 @@ const FIREBASE_CONFIG = {
 };
 
 let _linsaDb = null;
+let _linsaStorage = null;
 let _linsaFirebaseReady = false;
 
 function linsaFirebaseConfigured(){
@@ -47,6 +50,19 @@ function linsaInitFirebase(){
     return _linsaDb;
   } catch(e){
     console.error('Firebase init erè:', e);
+    return null;
+  }
+}
+
+function linsaInitStorage(){
+  if(_linsaStorage) return _linsaStorage;
+  if(!linsaInitFirebase()) return null;
+  if(typeof firebase === 'undefined' || !firebase.storage) return null;
+  try{
+    _linsaStorage = firebase.storage();
+    return _linsaStorage;
+  } catch(e){
+    console.error('Firebase Storage init erè:', e);
     return null;
   }
 }
@@ -81,4 +97,70 @@ async function linsaDeleteAppointment(id){
   const db = linsaInitFirebase();
   if(!db) throw new Error('firebase-not-configured');
   await db.collection('appointments').doc(id).delete();
+}
+
+/* ============================================================
+   PWOMOSYON (carousel) — videyo/foto anplwaye yo telechaje
+   sove nan Firebase Storage, ak metadata nan koleksyon 'promos'.
+============================================================ */
+
+/* Telechaje yon fichye (videyo/foto) sou Firebase Storage.
+   onProgress(pourcentaj 0-100) rele pandan telechajman an. */
+function linsaUploadPromoMedia(file, onProgress){
+  return new Promise(function(resolve, reject){
+    const storage = linsaInitStorage();
+    if(!storage){ reject(new Error('firebase-not-configured')); return; }
+    const safeName = Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+    const ref = storage.ref().child('promos/' + safeName);
+    const task = ref.put(file);
+    task.on('state_changed',
+      function(snap){
+        if(onProgress) onProgress(Math.round((snap.bytesTransferred / snap.totalBytes) * 100));
+      },
+      function(err){ reject(err); },
+      function(){
+        task.snapshot.ref.getDownloadURL().then(function(url){
+          resolve({ url: url, path: ref.fullPath });
+        }).catch(reject);
+      }
+    );
+  });
+}
+
+/* Koute (an tan reyèl) tout slide pwomosyon k ap sove nan baz done a.
+   callback(list) rele chak fwa gen chanjman; callback(null) si Firebase
+   pa konfigire, pou moun ki rele l la ka fè fallback sou site-content.js. */
+function linsaSubscribePromos(callback){
+  const db = linsaInitFirebase();
+  if(!db){ callback(null); return function(){}; }
+  return db.collection('promos').orderBy('createdAt', 'asc')
+    .onSnapshot(function(snap){
+      const list = [];
+      snap.forEach(function(doc){ list.push(Object.assign({ id: doc.id }, doc.data())); });
+      callback(list);
+    }, function(err){
+      console.error('Firebase lekti pwomosyon erè:', err);
+      callback(null);
+    });
+}
+
+async function linsaAddPromo(promo){
+  const db = linsaInitFirebase();
+  if(!db) throw new Error('firebase-not-configured');
+  await db.collection('promos').add(Object.assign({}, promo, {
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  }));
+}
+
+async function linsaDeletePromo(id, storagePath){
+  const db = linsaInitFirebase();
+  if(!db) throw new Error('firebase-not-configured');
+  await db.collection('promos').doc(id).delete();
+  if(storagePath){
+    const storage = linsaInitStorage();
+    if(storage){
+      try { await storage.ref().child(storagePath).delete(); }
+      catch(e){ console.warn('Pa t ka efase fichye Storage la:', e); }
+    }
+  }
 }

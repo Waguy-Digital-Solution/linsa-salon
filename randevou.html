@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
 <style>
 :root{
   --noir-prune:#161210;
@@ -223,17 +224,31 @@ footer{text-align:center;padding:24px;color:var(--text-dim);font-size:.8rem;bord
 <script>
 /* ============================================================
    ESPAS PIB — carousel pwomosyon
+   Priyorite: slide videyo/foto Admin telechaje sou Firebase Storage
+   (koleksyon 'promos'). Si pa gen okenn, sèvi ak PROMO_SLIDES
+   estatik nan site-content.js.
 ============================================================ */
 let promoIndex = 0;
 let promoTimer = null;
+let activeSlides = [];
+
+function startPromoSync(){
+  linsaSubscribePromos(function(list){
+    activeSlides = (list && list.length > 0) ? list : PROMO_SLIDES;
+    renderPromoSlides();
+  });
+}
 
 function renderPromoSlides(){
   const banner = document.getElementById('promo-banner');
   const container = document.getElementById('promo-slides');
   const dots = document.getElementById('promo-dots');
-  if(!PROMO_SLIDES || PROMO_SLIDES.length === 0){ banner.style.display = 'none'; return; }
+  clearInterval(promoTimer);
+  promoIndex = 0;
+  if(!activeSlides || activeSlides.length === 0){ banner.style.display = 'none'; return; }
+  banner.style.display = '';
 
-  container.innerHTML = PROMO_SLIDES.map((s, i) => {
+  container.innerHTML = activeSlides.map((s, i) => {
     const bg = s.type === 'video'
       ? `<video src="${s.src}" autoplay muted loop playsinline></video>`
       : s.type === 'image'
@@ -251,9 +266,9 @@ function renderPromoSlides(){
       </div>
     `;
   }).join('');
-  dots.innerHTML = PROMO_SLIDES.map((_, i) => `<div class="promo-dot ${i===0?'active':''}"></div>`).join('');
+  dots.innerHTML = activeSlides.map((_, i) => `<div class="promo-dot ${i===0?'active':''}"></div>`).join('');
 
-  if(PROMO_SLIDES.length > 1){
+  if(activeSlides.length > 1){
     promoTimer = setInterval(() => showPromoSlide(promoIndex + 1), 6000);
   }
 }
@@ -270,7 +285,7 @@ function showPromoSlide(index){
 function nextPromoSlide(){
   showPromoSlide(promoIndex + 1);
   clearInterval(promoTimer);
-  if(PROMO_SLIDES.length > 1) promoTimer = setInterval(() => showPromoSlide(promoIndex + 1), 6000);
+  if(activeSlides.length > 1) promoTimer = setInterval(() => showPromoSlide(promoIndex + 1), 6000);
 }
 
 /* ============================================================
@@ -376,7 +391,7 @@ function resetForm(){
   document.getElementById('f-date').min = todayStr();
 }
 
-renderPromoSlides();
+startPromoSync();
 renderJobs();
 renderServicesList();
 populateServiceSelect();

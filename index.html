@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
 <style>
 :root{
   --noir-prune:#161210;
@@ -353,6 +354,25 @@ input{font-family:inherit;}
 .admin-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px;}
 .admin-card h3{margin-bottom:12px;}
 .admin-card p{color:var(--text-dim);font-size:.9rem;line-height:1.5;}
+.promo-admin-status{font-size:.8rem;color:var(--or-clair);margin-top:8px;}
+.promo-upload-form{display:flex;flex-direction:column;gap:6px;margin-top:14px;max-width:420px;}
+.promo-upload-form label{font-size:.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;margin-top:8px;}
+.promo-upload-form input[type="text"],.promo-upload-form input[type="file"]{
+  background:var(--noir-prune);border:1px solid var(--line);border-radius:8px;color:var(--text);
+  padding:10px 12px;font-size:.9rem;outline:none;
+}
+.promo-progress{height:8px;background:var(--noir-prune);border-radius:6px;overflow:hidden;margin-top:10px;}
+.promo-progress-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--bordeaux),var(--or));transition:width .2s;}
+.promo-current-list{display:flex;flex-direction:column;gap:10px;margin-top:18px;}
+.promo-current-item{
+  display:flex;align-items:center;gap:12px;background:var(--noir-prune);border:1px solid var(--line);
+  border-radius:10px;padding:10px 12px;
+}
+.promo-current-item .thumb{width:56px;height:56px;border-radius:8px;object-fit:cover;background:var(--panel-2);flex:0 0 auto;}
+.promo-current-item .info{flex:1;min-width:0;}
+.promo-current-item .info .t{font-weight:700;font-size:.9rem;}
+.promo-current-item .info .s{font-size:.75rem;color:var(--text-dim);}
+.promo-current-item .del{color:var(--danger);font-size:1rem;padding:6px;flex:0 0 auto;}
 .todo-list{list-style:none;margin-top:10px;}
 .todo-list li{padding:8px 0;border-bottom:1px solid var(--line);font-size:.88rem;color:var(--text-dim);display:flex;gap:10px;}
 .todo-list li .num{color:var(--or);font-weight:700;}
@@ -540,6 +560,24 @@ input{font-family:inherit;}
           <li><span class="num">5.</span> Gestion stock</li>
           <li><span class="num">6.</span> Backend + sync cloud</li>
         </ul>
+      </div>
+      <div class="admin-card" id="admin-only-promo">
+        <h3>Pwomosyon — Paj Piblik (Carousel)</h3>
+        <p>Telechaje yon videyo oswa foto pwomosyon/piblisite ki ap parèt nan carousel la sou paj randevou piblik la (randevou.html). Yo ap parèt la an tan reyèl.</p>
+        <div class="promo-admin-status" id="promo-admin-status"></div>
+        <div class="promo-upload-form" id="promo-upload-form">
+          <label>Videyo oswa Foto</label>
+          <input type="file" id="promo-file" accept="video/*,image/*">
+          <label>Tit Kout (eyebrow, opsyonèl)</label>
+          <input type="text" id="promo-eyebrow" placeholder="Egzanp: Pwomosyon Mwa a">
+          <label>Gwo Tit</label>
+          <input type="text" id="promo-title" placeholder="Egzanp: Rabè 15% sou tout Lace">
+          <label>Ti Tèks (opsyonèl)</label>
+          <input type="text" id="promo-text" placeholder="Detay kout sou pwomosyon an">
+          <div class="promo-progress hidden" id="promo-progress"><div class="promo-progress-bar" id="promo-progress-bar"></div></div>
+          <button class="btn-primary" style="margin-top:10px;" onclick="uploadPromo()" id="promo-upload-btn">Telechaje & Pibliye</button>
+        </div>
+        <div class="promo-current-list" id="promo-current-list"></div>
       </div>
       <div class="admin-card">
         <h3>Done Lokal</h3>
@@ -804,7 +842,7 @@ function switchView(view){
   document.getElementById('view-'+view).classList.add('active');
   if(view==='clients') renderClients();
   if(view==='rapports') renderReports();
-  if(view==='admin') updateAdminInfo();
+  if(view==='admin'){ updateAdminInfo(); startPromosAdminSync(); }
   if(view==='rendezvous'){ startAppointmentsSync(); renderAppointments(); }
 }
 
@@ -1322,6 +1360,99 @@ function resetData(){
   localStorage.removeItem('linsa_sales');
   updateAdminInfo();
   showToast('Done yo efase');
+}
+
+/* ============================================================
+   ADMIN — PWOMOSYON (upload videyo/foto pou carousel piblik la)
+============================================================ */
+let promosCache = [];
+let promosUnsub = null;
+
+function startPromosAdminSync(){
+  const statusEl = document.getElementById('promo-admin-status');
+  const formEl = document.getElementById('promo-upload-form');
+  if(!statusEl) return;
+
+  if(!linsaFirebaseConfigured()){
+    statusEl.textContent = '⚠️ Firebase poko konfigire — gade firebase-config.js pou ka telechaje pwomosyon.';
+    formEl.style.display = 'none';
+    return;
+  }
+  statusEl.textContent = '☁️ Konekte — pwomosyon ou telechaje yo ap parèt otomatikman sou paj piblik la.';
+  formEl.style.display = 'flex';
+
+  if(promosUnsub) return;
+  promosUnsub = linsaSubscribePromos(function(list){
+    promosCache = list || [];
+    renderPromosAdminList();
+  });
+}
+
+function renderPromosAdminList(){
+  const container = document.getElementById('promo-current-list');
+  if(!container) return;
+  if(promosCache.length === 0){
+    container.innerHTML = '<div class="simple-note">Pa gen pwomosyon telechaje sou baz done a — carousel la ap sèvi ak slide egzanp yo nan site-content.js.</div>';
+    return;
+  }
+  container.innerHTML = promosCache.map(p => `
+    <div class="promo-current-item">
+      ${p.type === 'video'
+        ? `<video class="thumb" src="${p.src}" muted></video>`
+        : `<img class="thumb" src="${p.src}" alt="">`}
+      <div class="info">
+        <div class="t">${p.title || '(San tit)'}</div>
+        <div class="s">${p.type === 'video' ? '🎬 Videyo' : '🖼️ Foto'}${p.eyebrow ? ' · ' + p.eyebrow : ''}</div>
+      </div>
+      <button class="del" onclick="deletePromo('${p.id}', '${(p.storagePath||'').replace(/'/g,"\\'")}')">✕</button>
+    </div>
+  `).join('');
+}
+
+async function uploadPromo(){
+  const fileInput = document.getElementById('promo-file');
+  const file = fileInput.files[0];
+  if(!file){ showToast('Chwazi yon fichye videyo oswa foto dabò'); return; }
+
+  const eyebrow = document.getElementById('promo-eyebrow').value.trim();
+  const title = document.getElementById('promo-title').value.trim();
+  const text = document.getElementById('promo-text').value.trim();
+  const btn = document.getElementById('promo-upload-btn');
+  const progressWrap = document.getElementById('promo-progress');
+  const progressBar = document.getElementById('promo-progress-bar');
+
+  btn.disabled = true;
+  progressWrap.classList.remove('hidden');
+  progressBar.style.width = '0%';
+
+  try{
+    const { url, path } = await linsaUploadPromoMedia(file, function(pct){
+      progressBar.style.width = pct + '%';
+    });
+    await linsaAddPromo({
+      type: file.type.startsWith('video') ? 'video' : 'image',
+      src: url,
+      storagePath: path,
+      eyebrow, title, text
+    });
+    fileInput.value = '';
+    document.getElementById('promo-eyebrow').value = '';
+    document.getElementById('promo-title').value = '';
+    document.getElementById('promo-text').value = '';
+    showToast('Pwomosyon pibliye!');
+  } catch(e){
+    console.error(e);
+    showToast('Erè: pa t ka telechaje fichye a');
+  } finally {
+    btn.disabled = false;
+    progressWrap.classList.add('hidden');
+  }
+}
+
+async function deletePromo(id, storagePath){
+  if(!confirm('Efase pwomosyon sa a sou paj piblik la?')) return;
+  try{ await linsaDeletePromo(id, storagePath || null); }
+  catch(e){ showToast('Erè: pa t ka efase pwomosyon an'); }
 }
 
 /* ============================================================
