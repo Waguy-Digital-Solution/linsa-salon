@@ -12,7 +12,7 @@
 const PROMO_SLIDES = [
   {
     type:'gradient',
-    gradient:'linear-gradient(135deg,#E8813A 0%,#8B3F14 100%)',
+    gradient:'linear-gradient(135deg,#E0189A 0%,#5E0A3E 100%)',
     eyebrow:'Pwomosyon Mwa a',
     title:'Rabè 15% sou tout Lace',
     text:'Aplikasyon, kontou ak koafi lace — pwofite rabè a jiska fen mwa a.'
@@ -26,7 +26,7 @@ const PROMO_SLIDES = [
   },
   {
     type:'gradient',
-    gradient:'linear-gradient(135deg,#C4601E 0%,#241E19 100%)',
+    gradient:'linear-gradient(135deg,#9A0F63 0%,#241E19 100%)',
     eyebrow:'Randevou',
     title:'Pran Randevou w Alavans',
     text:'Rele nou nan 38896200 / 34616287 pou reyève plas ou.'
