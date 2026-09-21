@@ -375,9 +375,9 @@ input{font-family:inherit;}
 
     <div id="profile-select">
       <div class="profile-row">
-        <button class="profile-card" data-user="lisa" onclick="selectProfile('lisa')">
+        <button class="profile-card" data-user="linsa" onclick="selectProfile('linsa')">
           <div class="profile-avatar">L</div>
-          <div class="profile-name">Lisa</div>
+          <div class="profile-name">Linsa</div>
           <div class="profile-role">Admin</div>
         </button>
         <button class="profile-card" data-user="marie" onclick="selectProfile('marie')">
@@ -523,7 +523,7 @@ input{font-family:inherit;}
     <!-- ADMIN VIEW -->
     <div id="view-admin">
       <div class="admin-card">
-        <h3>Bienvini nan Admin, Lisa</h3>
+        <h3>Bienvini nan Admin, Linsa</h3>
         <p>Isit la ou ka jere pwofil, sèvis, ak konfigirasyon jeneral kès la. Vèsyon sa a se yon pwototip — done yo sove lokalman nan aparèy la (localStorage).</p>
       </div>
       <div class="admin-card">
@@ -574,7 +574,7 @@ input{font-family:inherit;}
    DATA MODEL
 ============================================================ */
 const USERS = {
-  lisa:  { name:'Lisa',  role:'admin',    pin:'1234' },
+  linsa: { name:'Linsa',  role:'admin',    pin:'1234' },
   marie: { name:'Marie', role:'cashier',  pin:'0000' }
 };
 
@@ -702,17 +702,17 @@ let state = {
 };
 
 function loadSales(){
-  try { return JSON.parse(localStorage.getItem('lisa_sales')||'[]'); } catch(e){ return []; }
+  try { return JSON.parse(localStorage.getItem('linsa_sales')||'[]'); } catch(e){ return []; }
 }
 function saveSales(sales){
-  localStorage.setItem('lisa_sales', JSON.stringify(sales));
+  localStorage.setItem('linsa_sales', JSON.stringify(sales));
 }
 
 function loadAppointments(){
-  try { return JSON.parse(localStorage.getItem('lisa_appointments')||'[]'); } catch(e){ return []; }
+  try { return JSON.parse(localStorage.getItem('linsa_appointments')||'[]'); } catch(e){ return []; }
 }
 function saveAppointments(list){
-  localStorage.setItem('lisa_appointments', JSON.stringify(list));
+  localStorage.setItem('linsa_appointments', JSON.stringify(list));
 }
 
 /* ============================================================
@@ -1374,7 +1374,7 @@ function updateAdminInfo(){
 
 function resetData(){
   if(!confirm('Efase tout vant demo yo? Aksyon sa a pa ka defèt.')) return;
-  localStorage.removeItem('lisa_sales');
+  localStorage.removeItem('linsa_sales');
   updateAdminInfo();
   showToast('Done yo efase');
 }
