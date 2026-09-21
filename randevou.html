@@ -45,6 +45,8 @@ input,select,textarea{font-family:inherit;}
 .hero .sub{font-size:.85rem;color:var(--text-dim);letter-spacing:3px;text-transform:uppercase;margin-top:6px;}
 .hero p{max-width:520px;margin:18px auto 0;color:var(--text-dim);font-size:.95rem;line-height:1.6;}
 .hero .contact{margin-top:16px;font-size:.9rem;color:var(--or-clair);font-weight:600;}
+a.phone-link{color:inherit;text-decoration:none;border-bottom:1px dotted currentColor;}
+a.phone-link:hover{border-bottom-style:solid;}
 
 /* ============ PROMO CAROUSEL ============ */
 .promo-banner{position:relative;height:260px;overflow:hidden;border-bottom:1px solid var(--line);}
@@ -140,7 +142,7 @@ footer{text-align:center;padding:24px;color:var(--text-dim);font-size:.8rem;bord
   <div class="mark">Linsa Salon de Beauté</div>
   <div class="sub">Manucure · Pédicure · Ongles · Cheveux · Coiffure · Barber</div>
   <p>Pran randevou w an dwat sou telefòn ou — nou ap konfime avè w. Chwazi sèvis ou vle a, dat ak lè k pi bon pou ou.</p>
-  <div class="contact">📞 38896200 / 34616287</div>
+  <div class="contact">📞 <a class="phone-link" href="https://wa.me/50938896200" target="_blank" rel="noopener">3889-6200</a> / <a class="phone-link" href="https://wa.me/50934616287" target="_blank" rel="noopener">3461-6287</a> (WhatsApp)</div>
 </div>
 
 <div class="promo-banner" id="promo-banner">
@@ -209,7 +211,7 @@ footer{text-align:center;padding:24px;color:var(--text-dim);font-size:.8rem;bord
   </div>
 </div>
 
-<footer>Linsa Salon de Beauté · 📞 38896200 / 34616287</footer>
+<footer>Linsa Salon de Beauté · 📞 <a class="phone-link" href="https://wa.me/50938896200" target="_blank" rel="noopener">3889-6200</a> / <a class="phone-link" href="https://wa.me/50934616287" target="_blank" rel="noopener">3461-6287</a></footer>
 
 <script src="services.js"></script>
 <script src="site-content.js"></script>
@@ -337,7 +339,7 @@ document.getElementById('rdv-form').addEventListener('submit', async function(e)
   const service = SERVICES.find(s => s.id === serviceId);
 
   if(!linsaFirebaseConfigured()){
-    errEl.textContent = 'Sistèm randevou an poko konekte. Tanpri rele nou nan 38896200 / 34616287.';
+    errEl.innerHTML = 'Sistèm randevou an poko konekte. Tanpri kontakte nou sou WhatsApp: <a class="phone-link" href="https://wa.me/50938896200" target="_blank" rel="noopener">3889-6200</a> / <a class="phone-link" href="https://wa.me/50934616287" target="_blank" rel="noopener">3461-6287</a>.';
     return;
   }
 
