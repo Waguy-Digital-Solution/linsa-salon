@@ -12,7 +12,8 @@ const CATEGORIES = [
   { id:'greff',    label:'Greff',                       key:'F6' },
   { id:'cheveux',  label:'Cheveux',                     key:'F7' },
   { id:'visage',   label:'Sourcils & Beauté',           key:'F8' },
-  { id:'barber',   label:'Barber Shop',                 key:'F9' }
+  { id:'barber',   label:'Barber Shop',                 key:'F9' },
+  { id:'maquillage', label:'Maquillage & Cils',         key:'' }
 ];
 
 /* price: number (fixed) | {min,max} (range) | null (à définir au moment de la vente) */
@@ -92,7 +93,12 @@ const SERVICES = [
   { id:56, cat:'barber', name:'Coupe compliquée',                        price:150 },
   { id:57, cat:'barber', name:'Coupe enfant',                            price:100 },
   { id:58, cat:'barber', name:'Tresse',                                 price:250 },
-  { id:59, cat:'barber', name:'Tresse barbe',                           price:300 }
+  { id:59, cat:'barber', name:'Tresse barbe',                           price:300 },
+
+  /* ===== MAQUILLAGE & CILS ===== */
+  { id:60, cat:'maquillage', name:'Makeup simple',                       price:3000 },
+  { id:61, cat:'maquillage', name:'Makeup compliqué',                    price:4000 },
+  { id:62, cat:'maquillage', name:'Extension cils',                      price:1500 }
 ];
 
 function servicePriceLabel(s){

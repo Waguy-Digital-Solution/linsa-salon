@@ -853,7 +853,7 @@ function renderCategories(){
   const bar = document.getElementById('cat-bar');
   bar.innerHTML = CATEGORIES.map(c => `
     <button class="cat-btn ${c.id===state.activeCat?'active':''}" onclick="setActiveCategory('${c.id}')">
-      <span class="fkey">${c.key}</span>${c.label}
+      ${c.key ? `<span class="fkey">${c.key}</span>` : ''}${c.label}
     </button>
   `).join('');
 }
