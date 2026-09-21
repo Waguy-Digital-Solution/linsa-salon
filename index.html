@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <style>
 :root{
   --noir-prune:#161210;
@@ -371,6 +373,7 @@ input{font-family:inherit;}
     <div class="login-logo">
       <div class="mark">Linsa Salon</div>
       <div class="sub">Caisse & Gestion</div>
+      <div style="margin-top:14px;"><a href="randevou.html" style="color:var(--or);font-size:.8rem;text-decoration:none;border-bottom:1px solid var(--or);padding-bottom:2px;">🔗 Paj randevou kliyan</a></div>
     </div>
 
     <div id="profile-select">
@@ -569,72 +572,18 @@ input{font-family:inherit;}
 
 <div class="toast" id="toast"></div>
 
+<script src="services.js"></script>
+<script src="firebase-config.js"></script>
 <script>
 /* ============================================================
    DATA MODEL
+   (CATEGORIES, SERVICES, servicePriceLabel(), formatHTG() soti nan services.js —
+    firebase-config.js bay fonksyon senkwonizasyon randevou yo)
 ============================================================ */
 const USERS = {
   linsa: { name:'Linsa',  role:'admin',    pin:'1234' },
   marie: { name:'Marie', role:'cashier',  pin:'0000' }
 };
-
-const CATEGORIES = [
-  { id:'manucure', label:'Manucure & Pédicure', key:'F1' },
-  { id:'ongles',   label:'Pose Ongles',         key:'F2' },
-  { id:'acrylic',  label:'Acrylic',             key:'F3' },
-  { id:'lace',     label:'Lace',                key:'F4' },
-  { id:'tara',     label:'Tara & Greff',        key:'F5' },
-  { id:'cheveux',  label:'Cheveux',             key:'F6' },
-  { id:'coiffure', label:'Coiffure',            key:'F7' },
-  { id:'visage',   label:'Beauté du Visage',    key:'F8' },
-  { id:'barber',   label:'Barber',              key:'F9' }
-];
-
-/* price: number (fixed) | {min,max} (range) | null (à définir au moment de la vente) */
-const SERVICES = [
-  { id:1,  cat:'manucure', name:'Manucure',                                   price:500 },
-  { id:2,  cat:'manucure', name:'Pédicure',                                   price:500 },
-
-  { id:3,  cat:'ongles', name:'Pose ongles simple gel',                       price:1500 },
-  { id:4,  cat:'ongles', name:'Pose ongles ordinaire',                        price:1250 },
-  { id:5,  cat:'ongles', name:'Pose ongles French',                          price:1750 },
-  { id:6,  cat:'ongles', name:'Pose ongles design',                          price:2000 },
-  { id:7,  cat:'ongles', name:'Pose ongles design premium',                  price:3000 },
-  { id:8,  cat:'ongles', name:'Pose ongles effet chrome + perles French',    price:3500 },
-  { id:9,  cat:'ongles', name:'Pose ongles design effet broche',             price:3500 },
-
-  { id:10, cat:'acrylic', name:'Acrylic court',                              price:3000 },
-  { id:11, cat:'acrylic', name:'Acrylic moyen',                              price:3500 },
-  { id:12, cat:'acrylic', name:'Acrylic long',                               price:4000 },
-  { id:13, cat:'acrylic', name:'Acrylic extra-long',                         price:5000 },
-  { id:14, cat:'acrylic', name:'Acrylic pieds',                              price:2000 },
-  { id:15, cat:'acrylic', name:'Acrylic pieds design',                       price:2250 },
-
-  { id:16, cat:'lace', name:'Application lace',                              price:3000 },
-  { id:17, cat:'lace', name:'Lace contour',                                  price:3500 },
-  { id:18, cat:'lace', name:'Lace coiffure',                                 price:{min:4000,max:5000} },
-  { id:19, cat:'lace', name:'Services lace (jusqu’à 7 500 Gdes)',       price:null, note:'Jusqu’à 7 500 Gdes' },
-
-  { id:20, cat:'tara', name:'Tara',                                          price:{min:3000,max:6000} },
-  { id:21, cat:'tara', name:'Greff',                                         price:{min:3000,max:6000} },
-
-  { id:22, cat:'cheveux', name:'Application permanente',                     price:2500 },
-  { id:23, cat:'cheveux', name:'Lavage cheveux',                             price:2000 },
-  { id:24, cat:'cheveux', name:'Lavage + Blow',                              price:4000 },
-  { id:25, cat:'cheveux', name:'Blow',                                       price:2500 },
-  { id:26, cat:'cheveux', name:'Lissage cheveux longs',                      price:5000 },
-  { id:27, cat:'cheveux', name:'Lissage cheveux courts',                     price:4000 },
-
-  { id:28, cat:'coiffure', name:'Coiffure',                                  price:{min:2500,max:5000} },
-  { id:29, cat:'coiffure', name:'Tresses africaines',                        price:null, note:'Prix selon le modèle' },
-
-  { id:30, cat:'visage', name:'Faux cils',                                   price:null },
-  { id:31, cat:'visage', name:'Teinture sourcils',                           price:null },
-
-  { id:32, cat:'barber', name:'Coupe simple',                                price:null },
-  { id:33, cat:'barber', name:'Coupe compliquée',                            price:null },
-  { id:34, cat:'barber', name:'Coupe enfant',                                price:null }
-];
 
 const PAYMENT_METHODS = [
   { id:'cash',     label:'Cash',      icon:'💵' },
@@ -887,7 +836,7 @@ function switchView(view){
   if(view==='clients') renderClients();
   if(view==='rapports') renderReports();
   if(view==='admin') updateAdminInfo();
-  if(view==='rendezvous') renderAppointments();
+  if(view==='rendezvous'){ startAppointmentsSync(); renderAppointments(); }
 }
 
 /* ============================================================
@@ -906,12 +855,6 @@ function setActiveCategory(catId){
   state.activeCat = catId;
   renderCategories();
   renderServices();
-}
-
-function servicePriceLabel(s){
-  if(typeof s.price === 'number') return { text: formatHTG(s.price), variable:false };
-  if(s.price && typeof s.price === 'object') return { text: formatHTG(s.price.min) + ' – ' + formatHTG(s.price.max), variable:true };
-  return { text: s.note || 'Prix à définir', variable:true };
 }
 
 function renderServices(){
@@ -1032,10 +975,6 @@ function renderCart(){
   const itemCount = state.cart.reduce((sum,i) => sum + i.qty, 0);
   const badge = document.getElementById('cart-fab-badge');
   if(badge) badge.textContent = itemCount;
-}
-
-function formatHTG(n){
-  return Math.round(n).toLocaleString('fr-FR') + ' HTG';
 }
 
 /* ============================================================
@@ -1205,8 +1144,14 @@ function startNewSale(){
 
 /* ============================================================
    RENDEZ-VOUS
+   Si Firebase konfigire (firebase-config.js), randevou yo koute an tan
+   reyèl nan baz done pataje a (menm randevou kliyan yo pran sou
+   randevou.html parèt la). Si pa konfigire, fallback sou localStorage.
 ============================================================ */
 const MOIS_KREYOL = ['Jan','Fev','Mas','Avr','Me','Jen','Jiy','Out','Sep','Okt','Nov','Des'];
+let appointmentsCache = [];
+let appointmentsUnsub = null;
+let appointmentsCloudActive = false;
 
 function populateAppointmentServices(){
   const select = document.getElementById('rdv-service');
@@ -1214,7 +1159,21 @@ function populateAppointmentServices(){
   select.innerHTML = SERVICES.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
 }
 
-function addAppointment(){
+function startAppointmentsSync(){
+  if(appointmentsUnsub) return;
+  appointmentsUnsub = linsaSubscribeAppointments(function(list){
+    if(list === null){
+      appointmentsCloudActive = false;
+      appointmentsCache = loadAppointments();
+    } else {
+      appointmentsCloudActive = true;
+      appointmentsCache = list;
+    }
+    renderAppointments();
+  });
+}
+
+async function addAppointment(){
   const name = document.getElementById('rdv-name').value.trim();
   const phone = document.getElementById('rdv-phone').value.trim();
   const serviceId = parseInt(document.getElementById('rdv-service').value, 10);
@@ -1228,15 +1187,25 @@ function addAppointment(){
   }
 
   const service = SERVICES.find(s => s.id === serviceId);
-  const list = loadAppointments();
-  list.push({
-    id: 'RDV' + Date.now(),
+  const appt = {
     name, phone, note,
     serviceId, serviceName: service ? service.name : '',
     date, time,
-    createdBy: USERS[state.currentUser].name
-  });
-  saveAppointments(list);
+    createdBy: USERS[state.currentUser].name,
+    source: 'kès'
+  };
+
+  if(appointmentsCloudActive){
+    try { await linsaAddAppointment(appt); }
+    catch(e){ showToast('Erè: pa t ka sove sou baz done a'); return; }
+  } else {
+    appt.id = 'RDV' + Date.now();
+    const list = loadAppointments();
+    list.push(appt);
+    saveAppointments(list);
+    appointmentsCache = list;
+    renderAppointments();
+  }
 
   document.getElementById('rdv-name').value = '';
   document.getElementById('rdv-phone').value = '';
@@ -1244,18 +1213,23 @@ function addAppointment(){
   document.getElementById('rdv-time').value = '';
   document.getElementById('rdv-note').value = '';
 
-  renderAppointments();
   showToast('Randevou ajoute pou ' + name);
 }
 
-function deleteAppointment(id){
+async function deleteAppointment(id){
+  if(appointmentsCloudActive){
+    try { await linsaDeleteAppointment(id); }
+    catch(e){ showToast('Erè: pa t ka efase sou baz done a'); }
+    return;
+  }
   saveAppointments(loadAppointments().filter(a => a.id !== id));
+  appointmentsCache = loadAppointments();
   renderAppointments();
 }
 
 function renderAppointments(){
   populateAppointmentServices();
-  const list = loadAppointments()
+  const list = appointmentsCache
     .filter(a => a.date)
     .sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time));
 
@@ -1265,12 +1239,14 @@ function renderAppointments(){
   const todayStr = new Date().toISOString().slice(0,10);
   const upcoming = list.filter(a => a.date >= todayStr);
 
+  const cloudNote = `<div class="simple-note" style="text-align:left;margin-bottom:10px;">${appointmentsCloudActive ? '☁️ Konekte ak baz done pataje — randevou kliyan yo parèt otomatikman.' : '⚠️ Mòd lokal (Firebase poko konfigire) — gade firebase-config.js.'}</div>`;
+
   if(upcoming.length === 0){
-    container.innerHTML = '<div class="cart-empty">Pa gen randevou k ap vini.</div>';
+    container.innerHTML = cloudNote + '<div class="cart-empty">Pa gen randevou k ap vini.</div>';
     return;
   }
 
-  container.innerHTML = upcoming.map(a => {
+  container.innerHTML = cloudNote + upcoming.map(a => {
     const d = new Date(a.date + 'T00:00:00');
     const isToday = a.date === todayStr;
     return `
@@ -1281,7 +1257,7 @@ function renderAppointments(){
         </div>
         <div class="rdv-info">
           <div class="name">${a.name}${a.phone ? ' · ' + a.phone : ''}</div>
-          <div class="meta">${a.serviceName}${a.note ? ' — ' + a.note : ''}</div>
+          <div class="meta">${a.serviceName}${a.note ? ' — ' + a.note : ''}${a.source ? ' · ' + a.source : ''}</div>
         </div>
         <div class="rdv-time">${a.time}</div>
         <button class="rdv-del" onclick="deleteAppointment('${a.id}')">✕</button>
