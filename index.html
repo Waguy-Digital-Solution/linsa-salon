@@ -573,6 +573,7 @@ input{font-family:inherit;}
 <div class="toast" id="toast"></div>
 
 <script src="services.js"></script>
+<script src="site-content.js"></script>
 <script src="firebase-config.js"></script>
 <script>
 /* ============================================================
@@ -603,38 +604,7 @@ const CLIENTS_SEED = [
   { id:6, name:'Mirlande Charles', phone:'3701-3345' }
 ];
 
-/* ============================================================
-   ESPAS PIB — pwomosyon sou ekran koneksyon an
-   Chak slide ka: 'gradient' (placeholder), 'image' (bg photo), oswa 'video' (klip).
-   Pou mete yon vrè foto oswa videyo: chanje 'type' pou 'image'/'video' epi bay 'src' la
-   (yon URL, oswa yon dosye lokal tankou "promo/lace.jpg").
-============================================================ */
-const PROMO_SLIDES = [
-  {
-    type:'gradient',
-    gradient:'linear-gradient(135deg,#E8813A 0%,#8B3F14 100%)',
-    eyebrow:'Pwomosyon Mwa a',
-    title:'Rabè 15% sou tout Lace',
-    text:'Aplikasyon, kontou ak koafi lace — pwofite rabè a jiska fen mwa a.'
-  },
-  {
-    type:'gradient',
-    gradient:'linear-gradient(135deg,#3A2E24 0%,#161210 100%)',
-    eyebrow:'Nouvo Sèvis',
-    title:'Pose Ongles Design',
-    text:'Kolòri, efè chrome ak perles French — soti 2 000 Gdes.'
-  },
-  {
-    type:'gradient',
-    gradient:'linear-gradient(135deg,#C4601E 0%,#241E19 100%)',
-    eyebrow:'Randevou',
-    title:'Pran Randevou w Alavans',
-    text:'Rele nou nan 38896200 / 34616287 pou reyève plas ou.'
-  }
-  // Egzanp pou ajoute yon slide ak yon vrè foto oswa videyo:
-  // { type:'image', src:'promo/salon.jpg', eyebrow:'Nou Fyè', title:'Ekip Linsa Salon', text:'' },
-  // { type:'video', src:'promo/demo.mp4', eyebrow:'Videyo', title:'Dekouvri Salon nou an', text:'' },
-];
+/* PROMO_SLIDES ak JOB_OPENINGS soti nan site-content.js (pataje ak randevou.html) */
 
 /* ============================================================
    STATE
