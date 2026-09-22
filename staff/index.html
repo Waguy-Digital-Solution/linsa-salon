@@ -112,7 +112,7 @@ input{font-family:inherit;}
   .services-grid{grid-template-columns:repeat(2,1fr);padding-bottom:120px;}
   .cart-col{top:0;width:100%;max-width:100%;}
   .cart-backdrop{top:0;}
-  #view-rendezvous.active,#view-clients.active,#view-rapports.active,#view-admin.active{padding:16px;}
+  #view-rendezvous.active,#view-clients.active,#view-rapports.active,#view-payroll.active,#view-admin.active{padding:16px;}
   .rdv-layout{flex-direction:column;}
   .rdv-form-col{width:100%;}
   .pay-body{flex-direction:column;overflow-y:auto;}
@@ -370,6 +370,8 @@ input{font-family:inherit;}
 /* ============ RAPPORTS ============ */
 #view-rapports{display:none;flex:1;padding:24px 30px;overflow-y:auto;}
 #view-rapports.active{display:flex;flex-direction:column;gap:24px;}
+#view-payroll{display:none;flex:1;padding:24px 30px;overflow-y:auto;}
+#view-payroll.active{display:flex;flex-direction:column;gap:20px;}
 .kpi-row{display:flex;gap:16px;}
 .kpi-card{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px;}
 .kpi-card .lbl{font-size:.78rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;}
@@ -414,6 +416,34 @@ input{font-family:inherit;}
   padding:10px 12px;font-size:.9rem;outline:none;
 }
 .drawer-status{font-size:.85rem;color:var(--or-clair);margin-top:12px;}
+.payroll-form{display:flex;flex-direction:column;gap:6px;margin-top:14px;max-width:420px;}
+.payroll-form label{font-size:.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;margin-top:8px;}
+.payroll-form input,.payroll-form select{
+  background:var(--noir-prune);border:1px solid var(--line);border-radius:8px;color:var(--text);
+  padding:10px 12px;font-size:.9rem;outline:none;
+}
+.payroll-row2{display:flex;gap:10px;}
+.payroll-row2>div{flex:1;display:flex;flex-direction:column;gap:6px;}
+.employee-list{display:flex;flex-direction:column;gap:10px;margin-top:16px;}
+.employee-item{
+  background:var(--noir-prune);border:1px solid var(--line);border-radius:10px;padding:14px 16px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+}
+.employee-item .info .name{font-weight:700;font-size:.95rem;}
+.employee-item .info .role{font-size:.78rem;color:var(--text-dim);margin-top:2px;}
+.employee-item .salary{color:var(--or-clair);font-weight:700;font-size:.9rem;white-space:nowrap;}
+.employee-item .actions{display:flex;gap:8px;}
+.employee-item .actions button{font-size:.78rem;padding:7px 12px;border-radius:8px;background:var(--panel-2);border:1px solid var(--line);color:var(--text);}
+.employee-item .actions .del{color:var(--danger);}
+.payroll-history{display:flex;flex-direction:column;gap:8px;margin-top:16px;}
+.payroll-history-item{
+  display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:.87rem;
+}
+.payroll-history-item:last-child{border-bottom:none;}
+.payroll-history-item .who{font-weight:600;}
+.payroll-history-item .meta{color:var(--text-dim);font-size:.78rem;}
+.payroll-history-item .amt{color:var(--or-clair);font-weight:700;white-space:nowrap;}
+.payroll-empty{color:var(--text-dim);font-size:.88rem;padding:10px 0;}
 .todo-list{list-style:none;margin-top:10px;}
 .todo-list li{padding:8px 0;border-bottom:1px solid var(--line);font-size:.88rem;color:var(--text-dim);display:flex;gap:10px;}
 .todo-list li .num{color:var(--or);font-weight:700;}
@@ -487,6 +517,7 @@ input{font-family:inherit;}
       <button data-view="rendezvous" onclick="switchView('rendezvous')">📅 Randevou</button>
       <button data-view="clients" onclick="switchView('clients')">👥 Clients</button>
       <button data-view="rapports" onclick="switchView('rapports')" data-admin-only="1">📊 Rapports</button>
+      <button data-view="payroll" onclick="switchView('payroll')" data-admin-only="1">💰 Peman Anplwaye</button>
       <button data-view="admin" onclick="switchView('admin')" data-admin-only="1">⚙️ Admin</button>
     </div>
     <div class="topbar-right">
@@ -582,6 +613,62 @@ input{font-family:inherit;}
       <div class="report-section">
         <h3>Top Sèvis (jodi a)</h3>
         <div id="report-services"></div>
+      </div>
+    </div>
+
+    <!-- PAYROLL VIEW (Admin sèlman) -->
+    <div id="view-payroll">
+      <div class="admin-card">
+        <h3>💰 Anplwaye & Peman</h3>
+        <p>Jesyon salè ak peman pou CEO a ak rès ekip la. Seksyon sa a vizib sèlman pou Admin — pa gen aksè pou Kesyè.</p>
+        <div class="payroll-form" id="employee-form">
+          <label>Non</label>
+          <input type="text" id="emp-name" placeholder="Egzanp: Linsa Guillaume">
+          <div class="payroll-row2">
+            <div>
+              <label>Wòl / Pòs</label>
+              <input type="text" id="emp-role" placeholder="Egzanp: CEO, Kwafèz, Barbye...">
+            </div>
+            <div>
+              <label>Frekans Peman</label>
+              <select id="emp-paytype">
+                <option value="mansyèl">Chak mwa</option>
+                <option value="semenn">Chak semenn</option>
+                <option value="kenzèn">Chak kenz jou</option>
+              </select>
+            </div>
+          </div>
+          <label>Salè (HTG)</label>
+          <input type="number" id="emp-salary" placeholder="Egzanp: 15000" min="0" step="1">
+          <button class="btn-primary" style="margin-top:10px;" onclick="addEmployee()">Ajoute Anplwaye</button>
+        </div>
+        <div class="employee-list" id="employee-list"></div>
+      </div>
+
+      <div class="admin-card">
+        <h3>Anrejistre yon Peman</h3>
+        <div class="payroll-form" id="payment-form">
+          <label>Anplwaye</label>
+          <select id="pay-employee"></select>
+          <div class="payroll-row2">
+            <div>
+              <label>Montan (HTG)</label>
+              <input type="number" id="pay-amount" placeholder="Egzanp: 15000" min="0" step="1">
+            </div>
+            <div>
+              <label>Dat</label>
+              <input type="date" id="pay-date">
+            </div>
+          </div>
+          <label>Nòt (opsyonèl)</label>
+          <input type="text" id="pay-note" placeholder="Egzanp: peman mwa septanm">
+          <button class="btn-primary" style="margin-top:10px;" onclick="addPayrollPayment()">Anrejistre Peman</button>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <h3>Istorik Peman</h3>
+        <div class="payroll-history" id="payroll-history"></div>
       </div>
     </div>
 
@@ -921,6 +1008,7 @@ function switchView(view){
   if(view==='rapports') renderReports();
   if(view==='admin'){ updateAdminInfo(); startPromosAdminSync(); initDrawerSettingsForm(); }
   if(view==='rendezvous'){ startAppointmentsSync(); renderAppointments(); }
+  if(view==='payroll'){ startPayrollSync(); }
 }
 
 /* ============================================================
@@ -1422,6 +1510,180 @@ function renderReports(){
       <div class="bar-val">${qty} vann</div>
     </div>
   `).join('') : '<div class="simple-note">Pa gen vant jodi a.</div>';
+}
+
+/* ============================================================
+   PEMAN ANPLWAYE (PAYROLL) — Admin sèlman
+============================================================ */
+let employeesUnsub = null;
+let paymentsUnsub = null;
+let employeesCloudActive = false;
+let paymentsCloudActive = false;
+let employeesCache = [];
+let paymentsCache = [];
+
+function loadEmployees(){
+  try { return JSON.parse(localStorage.getItem('linsa_employees')||'[]'); } catch(e){ return []; }
+}
+function saveEmployees(list){
+  localStorage.setItem('linsa_employees', JSON.stringify(list));
+}
+function loadPayrollPayments(){
+  try { return JSON.parse(localStorage.getItem('linsa_payroll_payments')||'[]'); } catch(e){ return []; }
+}
+function savePayrollPayments(list){
+  localStorage.setItem('linsa_payroll_payments', JSON.stringify(list));
+}
+
+function startPayrollSync(){
+  if(!employeesUnsub){
+    employeesUnsub = linsaSubscribeEmployees(function(list){
+      if(list === null){ employeesCloudActive = false; employeesCache = loadEmployees(); }
+      else { employeesCloudActive = true; employeesCache = list; }
+      renderEmployeeList();
+      populatePayEmployeeSelect();
+    });
+  }
+  if(!paymentsUnsub){
+    paymentsUnsub = linsaSubscribePayrollPayments(function(list){
+      if(list === null){ paymentsCloudActive = false; paymentsCache = loadPayrollPayments(); }
+      else { paymentsCloudActive = true; paymentsCache = list; }
+      renderPayrollHistory();
+    });
+  }
+  document.getElementById('pay-date').value = new Date().toISOString().slice(0,10);
+}
+
+async function addEmployee(){
+  const name = document.getElementById('emp-name').value.trim();
+  const role = document.getElementById('emp-role').value.trim();
+  const payType = document.getElementById('emp-paytype').value;
+  const salary = parseFloat(document.getElementById('emp-salary').value) || 0;
+
+  if(!name){ showToast('Ekri non anplwaye a'); return; }
+
+  const emp = { name, role, payType, salary, createdBy: USERS[state.currentUser].name };
+
+  if(employeesCloudActive){
+    try { await linsaAddEmployee(emp); }
+    catch(e){ showToast('Erè: pa t ka sove anplwaye a'); return; }
+  } else {
+    emp.id = 'EMP' + Date.now();
+    const list = loadEmployees();
+    list.push(emp);
+    saveEmployees(list);
+    employeesCache = list;
+    renderEmployeeList();
+    populatePayEmployeeSelect();
+  }
+
+  document.getElementById('emp-name').value = '';
+  document.getElementById('emp-role').value = '';
+  document.getElementById('emp-salary').value = '';
+  showToast('Anplwaye ' + name + ' ajoute');
+}
+
+async function deleteEmployee(id){
+  if(!confirm('Efase anplwaye sa a?')) return;
+  if(employeesCloudActive){
+    try { await linsaDeleteEmployee(id); }
+    catch(e){ showToast('Erè: pa t ka efase anplwaye a'); }
+    return;
+  }
+  saveEmployees(loadEmployees().filter(e => e.id !== id));
+  employeesCache = loadEmployees();
+  renderEmployeeList();
+  populatePayEmployeeSelect();
+}
+
+function renderEmployeeList(){
+  const el = document.getElementById('employee-list');
+  if(!employeesCache || employeesCache.length === 0){
+    el.innerHTML = '<div class="payroll-empty">Pa gen anplwaye ajoute ankò.</div>';
+    return;
+  }
+  el.innerHTML = employeesCache.map(e => `
+    <div class="employee-item">
+      <div class="info">
+        <div class="name">${e.name}</div>
+        <div class="role">${e.role || 'Anplwaye'} · ${e.payType || 'mansyèl'}</div>
+      </div>
+      <div class="salary">${formatHTG(e.salary || 0)}</div>
+      <div class="actions">
+        <button class="del" onclick="deleteEmployee('${e.id}')">Efase</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function populatePayEmployeeSelect(){
+  const sel = document.getElementById('pay-employee');
+  if(!sel) return;
+  const current = sel.value;
+  sel.innerHTML = (employeesCache || []).map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+  if(current) sel.value = current;
+}
+
+async function addPayrollPayment(){
+  const employeeId = document.getElementById('pay-employee').value;
+  const amount = parseFloat(document.getElementById('pay-amount').value) || 0;
+  const date = document.getElementById('pay-date').value || todayStr();
+  const note = document.getElementById('pay-note').value.trim();
+
+  const emp = (employeesCache || []).find(e => e.id === employeeId);
+  if(!emp){ showToast('Chwazi/ajoute yon anplwaye anvan'); return; }
+  if(amount <= 0){ showToast('Antre yon montan valid'); return; }
+
+  const payment = {
+    employeeId, employeeName: emp.name, amount, date, note,
+    createdBy: USERS[state.currentUser].name
+  };
+
+  if(paymentsCloudActive){
+    try { await linsaAddPayrollPayment(payment); }
+    catch(e){ showToast('Erè: pa t ka sove peman an'); return; }
+  } else {
+    payment.id = 'PAY' + Date.now();
+    const list = loadPayrollPayments();
+    list.push(payment);
+    savePayrollPayments(list);
+    paymentsCache = list;
+    renderPayrollHistory();
+  }
+
+  document.getElementById('pay-amount').value = '';
+  document.getElementById('pay-note').value = '';
+  showToast('Peman anrejistre pou ' + emp.name);
+}
+
+async function deletePayrollPayment(id){
+  if(!confirm('Efase peman sa a?')) return;
+  if(paymentsCloudActive){
+    try { await linsaDeletePayrollPayment(id); }
+    catch(e){ showToast('Erè: pa t ka efase peman an'); }
+    return;
+  }
+  savePayrollPayments(loadPayrollPayments().filter(p => p.id !== id));
+  paymentsCache = loadPayrollPayments();
+  renderPayrollHistory();
+}
+
+function renderPayrollHistory(){
+  const el = document.getElementById('payroll-history');
+  if(!paymentsCache || paymentsCache.length === 0){
+    el.innerHTML = '<div class="payroll-empty">Pa gen peman anrejistre ankò.</div>';
+    return;
+  }
+  const sorted = [...paymentsCache].sort((a,b) => (b.date||'').localeCompare(a.date||''));
+  el.innerHTML = sorted.map(p => `
+    <div class="payroll-history-item">
+      <div>
+        <div class="who">${p.employeeName}</div>
+        <div class="meta">${p.date}${p.note ? ' · ' + p.note : ''} · pa ${p.createdBy || ''}</div>
+      </div>
+      <div class="amt">${formatHTG(p.amount)} <span onclick="deletePayrollPayment('${p.id}')" style="cursor:pointer;color:var(--danger);margin-left:8px;">✕</span></div>
+    </div>
+  `).join('');
 }
 
 /* ============================================================

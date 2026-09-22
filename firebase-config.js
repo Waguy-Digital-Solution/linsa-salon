@@ -117,6 +117,65 @@ async function linsaDeleteAppointment(id){
 }
 
 /* ============================================================
+   PEMAN ANPLWAYE (PAYROLL) — rezève pou Admin (gade firestore.rules)
+============================================================ */
+function linsaSubscribeEmployees(callback){
+  const db = linsaInitFirebase();
+  if(!db){ callback(null); return function(){}; }
+  return db.collection('employees')
+    .onSnapshot(function(snap){
+      const list = [];
+      snap.forEach(function(doc){ list.push(Object.assign({ id: doc.id }, doc.data())); });
+      callback(list);
+    }, function(err){
+      console.error('Firebase lekti anplwaye erè:', err);
+      callback(null);
+    });
+}
+
+async function linsaAddEmployee(emp){
+  const db = linsaInitFirebase();
+  if(!db) throw new Error('firebase-not-configured');
+  await db.collection('employees').add(Object.assign({}, emp, {
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  }));
+}
+
+async function linsaDeleteEmployee(id){
+  const db = linsaInitFirebase();
+  if(!db) throw new Error('firebase-not-configured');
+  await db.collection('employees').doc(id).delete();
+}
+
+function linsaSubscribePayrollPayments(callback){
+  const db = linsaInitFirebase();
+  if(!db){ callback(null); return function(){}; }
+  return db.collection('payroll_payments')
+    .onSnapshot(function(snap){
+      const list = [];
+      snap.forEach(function(doc){ list.push(Object.assign({ id: doc.id }, doc.data())); });
+      callback(list);
+    }, function(err){
+      console.error('Firebase lekti peman erè:', err);
+      callback(null);
+    });
+}
+
+async function linsaAddPayrollPayment(payment){
+  const db = linsaInitFirebase();
+  if(!db) throw new Error('firebase-not-configured');
+  await db.collection('payroll_payments').add(Object.assign({}, payment, {
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  }));
+}
+
+async function linsaDeletePayrollPayment(id){
+  const db = linsaInitFirebase();
+  if(!db) throw new Error('firebase-not-configured');
+  await db.collection('payroll_payments').doc(id).delete();
+}
+
+/* ============================================================
    PWOMOSYON (carousel) — videyo/foto anplwaye yo telechaje
    sove nan Firebase Storage, ak metadata nan koleksyon 'promos'.
 ============================================================ */
