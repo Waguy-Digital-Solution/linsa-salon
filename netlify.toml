@@ -1,6 +1,6 @@
 [build]
-  publish = "public"
-  command = "mkdir -p public/assets staff/assets && cp services.js site-content.js firebase-config.js public/ && cp services.js site-content.js firebase-config.js staff/ && cp assets/logo.webp public/assets/ && cp assets/logo.webp staff/assets/"
+  publish = "dist"
+  command = "rm -rf dist && mkdir -p dist/assets && cp -r ${TARGET:-public}/. dist/ && cp services.js site-content.js firebase-config.js dist/ && cp assets/logo.webp dist/assets/"
 
 [[redirects]]
   from = "/*"
