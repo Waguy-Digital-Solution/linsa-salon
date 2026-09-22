@@ -97,9 +97,14 @@ a.phone-link:hover{border-bottom-style:solid;}
 .wrap{max-width:980px;margin:0 auto;padding:40px 20px 60px;display:grid;grid-template-columns:1.1fr 1fr;gap:32px;align-items:start;}
 @media (max-width:820px){ .wrap{grid-template-columns:1fr;} }
 
-.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:26px;}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:26px;min-width:0;}
 .card h2{font-size:1.3rem;margin-bottom:6px;}
 .card .desc{color:var(--text-dim);font-size:.88rem;margin-bottom:16px;}
+.back-to-services{
+  display:none;align-items:center;gap:6px;background:none;color:var(--or-clair);
+  font-size:.82rem;font-weight:700;margin-bottom:14px;padding:0;
+}
+.back-to-services.show{display:inline-flex;}
 
 /* Fòm nan rete vizib pandan defilman sou gwo ekran */
 @media (min-width:821px){
@@ -112,7 +117,7 @@ a.phone-link:hover{border-bottom-style:solid;}
   padding:11px 14px;font-size:.9rem;outline:none;margin-bottom:14px;
 }
 .svc-search:focus{border-color:var(--or);}
-.cat-tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;margin-bottom:14px;scrollbar-width:thin;}
+.cat-tabs{display:flex;gap:8px;width:100%;min-width:0;overflow-x:auto;padding-bottom:10px;margin-bottom:14px;scrollbar-width:thin;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;}
 .cat-tabs::-webkit-scrollbar{height:5px;}
 .cat-tabs::-webkit-scrollbar-thumb{background:var(--line);border-radius:5px;}
 .cat-tab{
@@ -212,7 +217,7 @@ footer{text-align:center;padding:24px;color:var(--text-dim);font-size:.8rem;bord
 </div>
 
 <div class="wrap">
-  <div class="card">
+  <div class="card" id="services-card">
     <h2>Sèvis nou yo</h2>
     <div class="desc">Pri yo an Goud (HTG). Klike sou yon sèvis pou chwazi l dirèkteman nan fòm randevou a.</div>
     <input type="search" id="svc-search" class="svc-search" placeholder="🔍 Chèche yon sèvis (egzanp: lace, coupe, manucure...)">
@@ -221,6 +226,7 @@ footer{text-align:center;padding:24px;color:var(--text-dim);font-size:.8rem;bord
   </div>
 
   <div class="card form-card" id="rdv-form-card">
+    <button type="button" class="back-to-services" id="back-to-services">← Tounen nan lis sèvis</button>
     <h2>Nouvo Randevou</h2>
     <div class="desc">Ranpli fòm lan pou rezève plas ou.</div>
 
@@ -483,7 +489,12 @@ function selectServiceAndScroll(serviceId){
   });
   const card = document.getElementById('rdv-form-card');
   card.scrollIntoView({ behavior:'smooth', block:'start' });
+  document.getElementById('back-to-services').classList.add('show');
 }
+
+document.getElementById('back-to-services').addEventListener('click', function(){
+  document.getElementById('services-card').scrollIntoView({ behavior:'smooth', block:'start' });
+});
 
 document.getElementById('svc-search').addEventListener('input', function(e){
   searchTerm = e.target.value;
