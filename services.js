@@ -63,8 +63,6 @@ const SERVICES = [
   { id:32, cat:'greff', name:'Lavage Greff',                            price:1500 },
 
   /* ===== CHEVEUX ===== */
-  /* NÒT: "Lavage cheveux naturels" te parèt 2 fwa (2 500 HTG ak 2 000 HTG) —
-     nou kenbe yon sèl antre, 2 500 HTG. Konfime ak pwopriyetè si sa kòrèk. */
   { id:33, cat:'cheveux', name:'Lavage cheveux naturels',                price:2500 },
   { id:34, cat:'cheveux', name:'Coiffure bigoudis',                     price:3000 },
   { id:35, cat:'cheveux', name:'Application texturizer',                price:2000 },
@@ -90,8 +88,6 @@ const SERVICES = [
   { id:54, cat:'visage', name:'Faux cils',                              price:1000 },
 
   /* ===== BARBER SHOP ===== */
-  /* NÒT: pri Barber yo (120 / 150 / 100 HTG) sanble ba anpil parapò ak rès
-     meni a — n ap pibliye yo men yo bezwen konfimasyon ak pwopriyetè a. */
   { id:55, cat:'barber', name:'Coupe simple — Barber (Homme)',           price:120 },
   { id:56, cat:'barber', name:'Coupe ak Design — Barber (Homme)',        price:150 },
   { id:57, cat:'barber', name:'Coupe enfant — Barber',                   price:100 },
