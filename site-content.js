@@ -29,7 +29,9 @@ const DEFAULT_SERVICE_DURATION_MIN = 45;
    Chak slide ka: 'gradient' (koulè, pa gen bezwen imaj),
    'image' (yon foto — bay 'src'), oswa 'video' (yon klip — bay 'src').
    'expiresAt': dat 'YYYY-MM-DD' opsyonèl — slide a disparèt otomatikman
-   apre dat sa a (pa gen bezwen retire l manyèlman). */
+   apre dat sa a (pa gen bezwen retire l manyèlman).
+   'link': URL opsyonèl — si prezan, yon bouton parèt sou slide a pou
+   moun ka klike pou ale gade l (egzanp: yon videyo TikTok). */
 const PROMO_SLIDES = [
   {
     type:'gradient',
@@ -52,6 +54,22 @@ const PROMO_SLIDES = [
     eyebrow:'Randevou',
     title:'Pran Randevou w Alavans',
     text:'Rele nou nan 38896200 / 34616287 pou rezève plas ou.'
+  },
+  {
+    type:'gradient',
+    gradient:'linear-gradient(135deg,#161210 0%,#5E0A3E 100%)',
+    eyebrow:'Sou TikTok',
+    title:'Gade dènye videyo nou an',
+    text:'Klike pou wè travay nou sou TikTok.',
+    link:'https://www.tiktok.com/t/ZP8TyR5ay/'
+  },
+  {
+    type:'gradient',
+    gradient:'linear-gradient(135deg,#241E19 0%,#E0189A 100%)',
+    eyebrow:'Sou TikTok',
+    title:'Yon lòt videyo pou ou',
+    text:'Klike pou wè plis videyo sou TikTok.',
+    link:'https://www.tiktok.com/t/ZP8TUnWJb/'
   }
   // Egzanp pou ajoute yon slide ak yon vrè foto oswa videyo:
   // { type:'image', src:'promo/salon.jpg', eyebrow:'Nou Fyè', title:'Ekip Linsa Salon', text:'' },

@@ -83,6 +83,12 @@ a.phone-link:hover{border-bottom-style:solid;}
 .promo-dot{width:8px;height:8px;border-radius:50%;background:rgba(251,243,236,.35);transition:.2s;}
 .promo-dot.active{background:var(--or);width:20px;border-radius:5px;}
 .promo-nav{position:absolute;inset:0;z-index:2;cursor:pointer;}
+.promo-link-btn{
+  display:none;position:absolute;left:24px;bottom:14px;z-index:3;
+  background:var(--or);color:var(--noir-prune);text-decoration:none;
+  padding:7px 16px;border-radius:20px;font-size:.78rem;font-weight:800;
+}
+.promo-link-btn.show{display:inline-flex;align-items:center;gap:6px;}
 
 /* ============ REKRITMAN ============ */
 .jobs-wrap{max-width:980px;margin:0 auto;padding:0 20px;}
@@ -227,6 +233,7 @@ footer{text-align:center;padding:24px;color:var(--text-dim);font-size:.8rem;bord
   <div id="promo-slides"></div>
   <div class="promo-nav" onclick="nextPromoSlide()"></div>
   <div class="promo-dots" id="promo-dots"></div>
+  <a href="#" class="promo-link-btn" id="promo-link-btn" target="_blank" rel="noopener">Gade →</a>
 </div>
 
 <div class="jobs-wrap hidden" id="jobs-wrap">
@@ -352,9 +359,22 @@ function renderPromoSlides(){
     `;
   }).join('');
   dots.innerHTML = activeSlides.map((_, i) => `<div class="promo-dot ${i===0?'active':''}"></div>`).join('');
+  updatePromoLinkBtn();
 
   if(activeSlides.length > 1){
     promoTimer = setInterval(() => showPromoSlide(promoIndex + 1), 6000);
+  }
+}
+
+function updatePromoLinkBtn(){
+  const btn = document.getElementById('promo-link-btn');
+  const slide = activeSlides && activeSlides[promoIndex];
+  if(slide && slide.link){
+    btn.href = slide.link;
+    btn.classList.add('show');
+  } else {
+    btn.classList.remove('show');
+    btn.removeAttribute('href');
   }
 }
 
@@ -365,6 +385,7 @@ function showPromoSlide(index){
   promoIndex = (index + slides.length) % slides.length;
   slides.forEach((el,i) => el.classList.toggle('active', i===promoIndex));
   dots.forEach((el,i) => el.classList.toggle('active', i===promoIndex));
+  updatePromoLinkBtn();
 }
 
 function nextPromoSlide(){
