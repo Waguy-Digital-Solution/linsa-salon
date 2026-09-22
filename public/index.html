@@ -228,12 +228,6 @@ footer{text-align:center;padding:24px;color:var(--text-dim);font-size:.8rem;bord
 }
 .music-toggle.playing{animation:music-pulse 1.6s ease-in-out infinite;}
 @keyframes music-pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
-.video-unmute-btn{
-  display:none;position:absolute;right:20px;bottom:14px;z-index:3;
-  background:rgba(11,9,8,.72);color:#fff;border:1px solid rgba(255,255,255,.3);
-  width:36px;height:36px;border-radius:50%;align-items:center;justify-content:center;font-size:1rem;
-}
-.video-unmute-btn.show{display:flex;}
 </style>
 </head>
 <body>
@@ -255,7 +249,6 @@ footer{text-align:center;padding:24px;color:var(--text-dim);font-size:.8rem;bord
   <div class="promo-nav" onclick="nextPromoSlide()"></div>
   <div class="promo-dots" id="promo-dots"></div>
   <a href="#" class="promo-link-btn" id="promo-link-btn" target="_blank" rel="noopener">Gade →</a>
-  <button type="button" class="video-unmute-btn" id="video-unmute-btn" aria-label="Aktive/dezaktive son videyo a" onclick="toggleVideoSound()">🔇</button>
 </div>
 
 <div class="jobs-wrap hidden" id="jobs-wrap">
@@ -347,6 +340,7 @@ footer{text-align:center;padding:24px;color:var(--text-dim);font-size:.8rem;bord
 ============================================================ */
 let promoIndex = 0;
 let promoTimer = null;
+let soundEnabled = false;
 let activeSlides = [];
 
 function startPromoSync(){
@@ -380,7 +374,7 @@ function renderPromoSlides(){
       `;
     }
     const bg = s.type === 'video'
-      ? `<video src="${s.src}" autoplay muted loop playsinline></video>`
+      ? `<video src="${s.src}" muted playsinline preload="auto"></video>`
       : s.type === 'image'
         ? `<div class="bg" style="background-image:url('${s.src}')"></div>`
         : `<div class="bg" style="background:${s.gradient}"></div>`;
@@ -399,14 +393,65 @@ function renderPromoSlides(){
   dots.innerHTML = activeSlides.map((_, i) => `<div class="promo-dot ${i===0?'active':''}"></div>`).join('');
   updatePromoLinkBtn();
   updateTiktokBannerHeight();
-  updateVideoUnmuteBtn();
   if(window.tiktokEmbed && window.tiktokEmbed.lib && window.tiktokEmbed.lib.render){
     window.tiktokEmbed.lib.render(document.querySelectorAll('.tiktok-embed'));
   }
 
-  if(activeSlides.length > 1){
-    promoTimer = setInterval(() => showPromoSlide(promoIndex + 1), 6000);
+  syncPromoPlayback();
+}
+
+/* Chak videyo dwe jwe yon sèl fwa nan tan pa li, san l pa melanje ak
+   lòt slide yo: sèl videyo slide aktif la ap jwe (lòt yo anpoz e
+   ranmennen nan kòmansman); karousèl la avanse tou sèl apre yon dire
+   fiks pou slide gradient/tiktok, men li tann videyo a FINI (evènman
+   'ended') anvan l avanse pou yon slide videyo.
+
+   Son an altène otomatik: si moun nan deja "debloke" son (soundEnabled),
+   mizik background la jwe pandan slide ki pa gen videyo, epi li koupe
+   pou bay plas ak son pwòp chak videyo — youn apre lòt, san lòt aksyon
+   moun bezwen fè. */
+function syncPromoPlayback(){
+  clearTimeout(promoTimer);
+  clearInterval(promoTimer);
+  if(!activeSlides || activeSlides.length === 0) return;
+
+  const slide = activeSlides[promoIndex];
+  const isVideoSlide = !!(slide && slide.type === 'video');
+  const bgMusic = document.getElementById('bg-music');
+
+  document.querySelectorAll('.promo-slide video').forEach((v) => {
+    const slideIndex = parseInt(v.closest('.promo-slide').dataset.index, 10);
+    if(slideIndex === promoIndex){
+      v.muted = !(soundEnabled && isVideoSlide);
+      if(v.paused){
+        v.currentTime = 0;
+        v.onended = null;
+        v.play().catch(function(){});
+      }
+    } else {
+      v.pause();
+      v.currentTime = 0;
+    }
+  });
+
+  if(bgMusic){
+    if(soundEnabled && !isVideoSlide){
+      if(bgMusic.paused) bgMusic.play().catch(function(){});
+    } else if(!bgMusic.paused){
+      bgMusic.pause();
+    }
   }
+
+  if(activeSlides.length <= 1) return;
+
+  if(isVideoSlide){
+    const activeVideo = document.querySelector('.promo-slide.active video');
+    if(activeVideo){
+      activeVideo.onended = function(){ showPromoSlide(promoIndex + 1); };
+      return;
+    }
+  }
+  promoTimer = setTimeout(() => showPromoSlide(promoIndex + 1), 6000);
 }
 
 function updateTiktokBannerHeight(){
@@ -414,36 +459,6 @@ function updateTiktokBannerHeight(){
   const slide = activeSlides && activeSlides[promoIndex];
   const isVertical = !!(slide && (slide.type === 'tiktok' || slide.type === 'video'));
   banner.classList.toggle('tiktok-active', isVertical);
-}
-
-/* Videyo pwomosyon yo dwe kòmanse "muted" pou navigatè a kite yo autoplay,
-   men yo gen pwòp mizik yo ladan — bouton sa a kite moun aktive son an.
-   Lè son videyo a aktive, mizik background la sispann pou l pa mele ak
-   mizik ki deja nan videyo a. */
-function updateVideoUnmuteBtn(){
-  const btn = document.getElementById('video-unmute-btn');
-  const slide = activeSlides && activeSlides[promoIndex];
-  if(slide && slide.type === 'video'){
-    btn.classList.add('show');
-    const videoEl = document.querySelector('.promo-slide.active video');
-    btn.textContent = (videoEl && !videoEl.muted) ? '🔊' : '🔇';
-  } else {
-    btn.classList.remove('show');
-  }
-}
-
-function toggleVideoSound(){
-  const videoEl = document.querySelector('.promo-slide.active video');
-  if(!videoEl) return;
-  videoEl.muted = !videoEl.muted;
-  document.getElementById('video-unmute-btn').textContent = videoEl.muted ? '🔇' : '🔊';
-  if(!videoEl.muted){
-    const bgMusic = document.getElementById('bg-music');
-    if(bgMusic && !bgMusic.paused){
-      bgMusic.pause();
-      document.getElementById('music-toggle').classList.remove('playing');
-    }
-  }
 }
 
 function updatePromoLinkBtn(){
@@ -467,13 +482,11 @@ function showPromoSlide(index){
   dots.forEach((el,i) => el.classList.toggle('active', i===promoIndex));
   updatePromoLinkBtn();
   updateTiktokBannerHeight();
-  updateVideoUnmuteBtn();
+  syncPromoPlayback();
 }
 
 function nextPromoSlide(){
   showPromoSlide(promoIndex + 1);
-  clearInterval(promoTimer);
-  if(activeSlides.length > 1) promoTimer = setInterval(() => showPromoSlide(promoIndex + 1), 6000);
 }
 
 /* ============================================================
@@ -765,28 +778,17 @@ function resetForm(){
   document.querySelectorAll('.svc-row').forEach(r => r.classList.remove('selected'));
 }
 
-/* MIZIK BACKGROUND — pa gen autoplay ak son san yon aksyon moun (navigatè
-   yo bloke sa), donk bouton an kòmanse an "pa jwe" e kliyan dwe klike pou
-   li kòmanse. */
+/* SON KAROUSÈL LA — pa gen autoplay ak son san yon aksyon moun (navigatè
+   yo bloke sa), donk bouton sa a se yon sèl "debloke son" pou tout
+   eksperyans lan: yon fwa moun klike, mizik background la ak son chak
+   videyo yo altène otomatik youn apre lòt (gade syncPromoPlayback), san
+   moun bezwen klike anyen ankò. Yon dezyèm klik koupe son an nèt. */
 (function initMusicToggle(){
   const btn = document.getElementById('music-toggle');
-  const audio = document.getElementById('bg-music');
   btn.addEventListener('click', function(){
-    if(audio.paused){
-      const activeVideo = document.querySelector('.promo-slide.active video');
-      if(activeVideo && !activeVideo.muted){
-        activeVideo.muted = true;
-        const unmuteBtn = document.getElementById('video-unmute-btn');
-        if(unmuteBtn) unmuteBtn.textContent = '🔇';
-      }
-      audio.play().then(function(){
-        btn.classList.add('playing');
-        btn.textContent = '🎵';
-      }).catch(function(){});
-    } else {
-      audio.pause();
-      btn.classList.remove('playing');
-    }
+    soundEnabled = !soundEnabled;
+    btn.classList.toggle('playing', soundEnabled);
+    syncPromoPlayback();
   });
 })();
 
