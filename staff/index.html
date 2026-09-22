@@ -88,6 +88,34 @@ input{font-family:inherit;}
 .keypad button:active{background:var(--panel-2);transform:scale(.95);}
 .keypad button.action{background:transparent;border:none;color:var(--or);font-size:1.1rem;}
 
+/* ============ MOBIL (telefòn) ============ */
+@media (max-width: 860px){
+  html,body{height:auto;min-height:100%;overflow:visible;}
+  .screen{position:static;min-height:100vh;}
+  .screen.active{display:flex;}
+  #screen-login{flex-direction:column;height:auto;min-height:100vh;overflow-y:auto;}
+  .login-col{width:100%;min-width:0;padding:36px 20px;gap:24px;}
+  .login-logo .logo-img{width:120px;height:120px;}
+  .profile-row{flex-wrap:wrap;justify-content:center;gap:16px;}
+  .profile-card{width:132px;padding:20px 14px;}
+  .keypad{grid-template-columns:repeat(3,60px);gap:10px;}
+  .keypad button{width:60px;height:60px;font-size:1.2rem;}
+  .promo-col{flex:0 0 auto;width:100%;height:220px;}
+  #app{height:auto;min-height:100vh;}
+  .topbar{flex-wrap:wrap;height:auto;padding:10px 14px;gap:10px;}
+  .nav{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .main{overflow:visible;}
+  #view-caisse.active{flex-direction:column;overflow:visible;}
+  .services-grid{grid-template-columns:repeat(2,1fr);padding-bottom:120px;}
+  .cart-col{top:0;width:100%;max-width:100%;}
+  .cart-backdrop{top:0;}
+  #view-rendezvous.active,#view-clients.active,#view-rapports.active,#view-admin.active{padding:16px;}
+  .rdv-layout{flex-direction:column;}
+  .rdv-form-col{width:100%;}
+  .pay-body{flex-direction:column;overflow-y:auto;}
+  .pay-methods{width:100%;border-right:none;border-bottom:1px solid var(--line);}
+}
+
 /* ============ ESPAS PIB (PROMO CAROUSEL) ============ */
 .promo-col{
   flex:1;position:relative;overflow:hidden;background:var(--noir-prune);
@@ -394,7 +422,7 @@ input{font-family:inherit;}
     <div class="login-logo">
       <img src="assets/logo.webp" alt="Linsa Salon de Beauté & Barber Shop" class="logo-img">
       <div class="sub">Caisse & Gestion</div>
-      <div style="margin-top:14px;"><a href="randevou.html" style="color:var(--or);font-size:.8rem;text-decoration:none;border-bottom:1px solid var(--or);padding-bottom:2px;">🔗 Paj randevou kliyan</a></div>
+      <div style="margin-top:14px;"><a href="https://linsa-salon.netlify.app/" target="_blank" rel="noopener" style="color:var(--or);font-size:.8rem;text-decoration:none;border-bottom:1px solid var(--or);padding-bottom:2px;">🔗 Paj randevou kliyan</a></div>
     </div>
 
     <div id="profile-select">
