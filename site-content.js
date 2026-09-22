@@ -34,23 +34,23 @@ const DEFAULT_SERVICE_DURATION_MIN = 45;
    moun ka klike pou ale gade l (egzanp: yon videyo TikTok). */
 const PROMO_SLIDES = [
   {
-    type:'gradient',
-    gradient:'linear-gradient(135deg,#E0189A 0%,#5E0A3E 100%)',
+    type:'image',
+    src:'assets/promo/promo-slide1.webp',
     eyebrow:'Pwomosyon Mwa a',
     title:'Rabè 15% sou tout Lace',
     text:'Aplikasyon, kontou ak koafi lace — valab jiska 30 septanm 2026.',
     expiresAt:'2026-09-30'
   },
   {
-    type:'gradient',
-    gradient:'linear-gradient(135deg,#3A2E24 0%,#161210 100%)',
+    type:'image',
+    src:'assets/promo/promo-slide2.webp',
     eyebrow:'Nouvo Sèvis',
     title:'Pose Ongles Design',
     text:'Kolòri, efè chrome ak perles French — soti 2 000 Gdes.'
   },
   {
-    type:'gradient',
-    gradient:'linear-gradient(135deg,#9A0F63 0%,#241E19 100%)',
+    type:'image',
+    src:'assets/promo/promo-slide3.webp',
     eyebrow:'Randevou',
     title:'Pran Randevou w Alavans',
     text:'Rele nou nan 38896200 / 34616287 pou rezève plas ou.'
