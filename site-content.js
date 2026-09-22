@@ -61,8 +61,8 @@ const PROMO_SLIDES = [
     eyebrow:'Sou TikTok'
   },
   {
-    type:'tiktok',
-    url:'https://www.tiktok.com/t/ZP8TUnWJb/',
+    type:'video',
+    src:'assets/promo/tiktok-2.mp4',
     eyebrow:'Sou TikTok'
   }
   // Egzanp pou ajoute yon slide ak yon vrè foto oswa videyo:
