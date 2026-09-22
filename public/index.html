@@ -88,9 +88,6 @@ a.phone-link:hover{border-bottom-style:solid;}
 .promo-slide .text{font-size:.85rem;color:var(--text-dim);margin-top:6px;max-width:420px;}
 @media (max-width:700px){
   .promo-banner{min-height:72svh;}
-  .promo-slide .bg{background-position:65% center;}
-  .promo-slide video,
-  .promo-slide img{object-position:65% center;}
 }
 .promo-dots{position:absolute;bottom:14px;right:20px;z-index:3;display:flex;gap:7px;}
 .promo-dot{width:8px;height:8px;border-radius:50%;background:rgba(251,243,236,.35);transition:.2s;}
@@ -387,7 +384,7 @@ function renderPromoSlides(){
     const bg = s.type === 'video'
       ? `<video src="${s.src}" autoplay muted loop playsinline></video>`
       : s.type === 'image'
-        ? `<div class="bg" style="background-image:url('${s.src}')"></div>`
+        ? `<div class="bg" style="background-image:url('${s.src}');background-position:${s.focus || 'center'}"></div>`
         : `<div class="bg" style="background:${s.gradient}"></div>`;
     return `
       <div class="promo-slide ${i===0?'active':''}" data-index="${i}">
