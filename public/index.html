@@ -436,13 +436,22 @@ function syncPromoPlayback(){
     }
   });
 
+  const musicBtn = document.getElementById('music-toggle');
   if(bgMusic){
     if(soundEnabled && !isVideoSlide){
-      if(bgMusic.paused) bgMusic.play().catch(function(){});
+      if(bgMusic.paused){
+        bgMusic.play().then(function(){
+          if(musicBtn) musicBtn.classList.add('playing');
+        }).catch(function(err){
+          console.warn('Mizik background pa t ka jwe:', err && err.message);
+          if(musicBtn) musicBtn.classList.remove('playing');
+        });
+      }
     } else if(!bgMusic.paused){
       bgMusic.pause();
     }
   }
+  if(musicBtn && (!soundEnabled || isVideoSlide)) musicBtn.classList.remove('playing');
 
   if(activeSlides.length <= 1) return;
   promoTimer = setTimeout(() => showPromoSlide(promoIndex + 1), 15000);
@@ -781,7 +790,6 @@ function resetForm(){
   const btn = document.getElementById('music-toggle');
   btn.addEventListener('click', function(){
     soundEnabled = !soundEnabled;
-    btn.classList.toggle('playing', soundEnabled);
     syncPromoPlayback();
   });
 })();
