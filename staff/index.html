@@ -640,7 +640,8 @@ input{font-family:inherit;}
           </div>
           <label>Salè (HTG)</label>
           <input type="number" id="emp-salary" placeholder="Egzanp: 15000" min="0" step="1">
-          <button class="btn-primary" style="margin-top:10px;" onclick="addEmployee()">Ajoute Anplwaye</button>
+          <button class="btn-primary" style="margin-top:10px;" id="emp-submit-btn" onclick="saveEmployee()">Ajoute Anplwaye</button>
+          <button class="btn-logout hidden" style="margin-top:6px;" id="emp-cancel-btn" onclick="cancelEditEmployee()">Anile Modifikasyon</button>
         </div>
         <div class="employee-list" id="employee-list"></div>
       </div>
@@ -1554,7 +1555,9 @@ function startPayrollSync(){
   document.getElementById('pay-date').value = new Date().toISOString().slice(0,10);
 }
 
-async function addEmployee(){
+let editingEmployeeId = null;
+
+async function saveEmployee(){
   const name = document.getElementById('emp-name').value.trim();
   const role = document.getElementById('emp-role').value.trim();
   const payType = document.getElementById('emp-paytype').value;
@@ -1563,6 +1566,24 @@ async function addEmployee(){
   if(!name){ showToast('Ekri non anplwaye a'); return; }
 
   const emp = { name, role, payType, salary, createdBy: USERS[state.currentUser].name };
+
+  if(editingEmployeeId){
+    if(employeesCloudActive){
+      try { await linsaUpdateEmployee(editingEmployeeId, emp); }
+      catch(e){ showToast('Erè: pa t ka sove chanjman yo'); return; }
+    } else {
+      const list = loadEmployees();
+      const idx = list.findIndex(e => e.id === editingEmployeeId);
+      if(idx > -1) list[idx] = Object.assign({}, list[idx], emp);
+      saveEmployees(list);
+      employeesCache = list;
+      renderEmployeeList();
+      populatePayEmployeeSelect();
+    }
+    showToast('Enfòmasyon ' + name + ' mete ajou');
+    cancelEditEmployee();
+    return;
+  }
 
   if(employeesCloudActive){
     try { await linsaAddEmployee(emp); }
@@ -1581,6 +1602,29 @@ async function addEmployee(){
   document.getElementById('emp-role').value = '';
   document.getElementById('emp-salary').value = '';
   showToast('Anplwaye ' + name + ' ajoute');
+}
+
+function editEmployee(id){
+  const emp = (employeesCache || []).find(e => e.id === id);
+  if(!emp) return;
+  editingEmployeeId = id;
+  document.getElementById('emp-name').value = emp.name || '';
+  document.getElementById('emp-role').value = emp.role || '';
+  document.getElementById('emp-paytype').value = emp.payType || 'mansyèl';
+  document.getElementById('emp-salary').value = emp.salary || '';
+  document.getElementById('emp-submit-btn').textContent = 'Sove Chanjman';
+  document.getElementById('emp-cancel-btn').classList.remove('hidden');
+  document.getElementById('employee-form').scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function cancelEditEmployee(){
+  editingEmployeeId = null;
+  document.getElementById('emp-name').value = '';
+  document.getElementById('emp-role').value = '';
+  document.getElementById('emp-salary').value = '';
+  document.getElementById('emp-paytype').value = 'mansyèl';
+  document.getElementById('emp-submit-btn').textContent = 'Ajoute Anplwaye';
+  document.getElementById('emp-cancel-btn').classList.add('hidden');
 }
 
 async function deleteEmployee(id){
@@ -1610,6 +1654,7 @@ function renderEmployeeList(){
       </div>
       <div class="salary">${formatHTG(e.salary || 0)}</div>
       <div class="actions">
+        <button onclick="editEmployee('${e.id}')">✎ Modifye</button>
         <button class="del" onclick="deleteEmployee('${e.id}')">Efase</button>
       </div>
     </div>

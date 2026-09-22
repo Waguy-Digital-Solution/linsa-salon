@@ -141,6 +141,12 @@ async function linsaAddEmployee(emp){
   }));
 }
 
+async function linsaUpdateEmployee(id, emp){
+  const db = linsaInitFirebase();
+  if(!db) throw new Error('firebase-not-configured');
+  await db.collection('employees').doc(id).update(emp);
+}
+
 async function linsaDeleteEmployee(id){
   const db = linsaInitFirebase();
   if(!db) throw new Error('firebase-not-configured');
