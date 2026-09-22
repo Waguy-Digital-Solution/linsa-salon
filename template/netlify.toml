@@ -1,0 +1,9 @@
+[build]
+  publish = "dist"
+  command = "rm -rf dist && mkdir -p dist/assets && cp -r ${TARGET:-public}/. dist/ && cp services.js site-content.js firebase-config.js dist/ && cp assets/logo.webp dist/assets/"
+
+[[redirects]]
+  from = "/*"
+  to = "/:splat"
+  status = 200
+  force = false
