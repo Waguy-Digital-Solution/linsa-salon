@@ -145,7 +145,13 @@ a.phone-link:hover{border-bottom-style:solid;}
 }
 .cat-scroll-btn.right{right:0;background:linear-gradient(270deg, var(--panel) 40%, rgba(36,30,25,0));}
 .cat-scroll-btn.left{left:0;}
-.cat-scroll-btn.show{opacity:1;pointer-events:auto;}
+.cat-scroll-btn.show{opacity:1;}
+/* Sèlman aktive klike-pou-defile a pou aparèy ak yon sourit (dispozitif "fin"
+   pointer) — sou telefòn/tablèt, bouton yo rete vizib men pa entèsepte jès
+   swipe dwèt la, ki se fason prensipal moun defile sou touch. */
+@media (hover:hover) and (pointer:fine){
+  .cat-scroll-btn.show{pointer-events:auto;}
+}
 
 /* ============ SERVICES LIST ============ */
 .cat-group{margin-bottom:22px;}
