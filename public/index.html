@@ -72,6 +72,7 @@ a.phone-link:hover{border-bottom-style:solid;}
 .promo-banner{position:relative;height:260px;overflow:hidden;border-bottom:1px solid var(--line);transition:height .35s ease;}
 .promo-banner.tiktok-active{height:600px;overflow-y:auto;}
 .promo-banner.tiktok-active .promo-nav{pointer-events:none;}
+.promo-banner.tiktok-active .promo-slide video{object-fit:contain;background:#000;}
 .promo-slide{position:absolute;inset:0;opacity:0;transition:opacity .8s ease;display:flex;align-items:flex-end;}
 .promo-slide.tiktok-slide{align-items:center;justify-content:center;padding:16px 0;pointer-events:none;}
 .promo-slide.tiktok-slide.active{pointer-events:auto;}
@@ -411,11 +412,14 @@ function renderPromoSlides(){
 function updateTiktokBannerHeight(){
   const banner = document.getElementById('promo-banner');
   const slide = activeSlides && activeSlides[promoIndex];
-  banner.classList.toggle('tiktok-active', !!(slide && slide.type === 'tiktok'));
+  const isVertical = !!(slide && (slide.type === 'tiktok' || slide.type === 'video'));
+  banner.classList.toggle('tiktok-active', isVertical);
 }
 
 /* Videyo pwomosyon yo dwe kòmanse "muted" pou navigatè a kite yo autoplay,
-   men yo gen pwòp mizik yo ladan — bouton sa a kite moun aktive son an. */
+   men yo gen pwòp mizik yo ladan — bouton sa a kite moun aktive son an.
+   Lè son videyo a aktive, mizik background la sispann pou l pa mele ak
+   mizik ki deja nan videyo a. */
 function updateVideoUnmuteBtn(){
   const btn = document.getElementById('video-unmute-btn');
   const slide = activeSlides && activeSlides[promoIndex];
@@ -433,6 +437,13 @@ function toggleVideoSound(){
   if(!videoEl) return;
   videoEl.muted = !videoEl.muted;
   document.getElementById('video-unmute-btn').textContent = videoEl.muted ? '🔇' : '🔊';
+  if(!videoEl.muted){
+    const bgMusic = document.getElementById('bg-music');
+    if(bgMusic && !bgMusic.paused){
+      bgMusic.pause();
+      document.getElementById('music-toggle').classList.remove('playing');
+    }
+  }
 }
 
 function updatePromoLinkBtn(){
@@ -762,6 +773,12 @@ function resetForm(){
   const audio = document.getElementById('bg-music');
   btn.addEventListener('click', function(){
     if(audio.paused){
+      const activeVideo = document.querySelector('.promo-slide.active video');
+      if(activeVideo && !activeVideo.muted){
+        activeVideo.muted = true;
+        const unmuteBtn = document.getElementById('video-unmute-btn');
+        if(unmuteBtn) unmuteBtn.textContent = '🔇';
+      }
       audio.play().then(function(){
         btn.classList.add('playing');
         btn.textContent = '🎵';

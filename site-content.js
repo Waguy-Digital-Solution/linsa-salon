@@ -57,13 +57,11 @@ const PROMO_SLIDES = [
   },
   {
     type:'video',
-    src:'assets/promo/tiktok-1.mp4',
-    eyebrow:'Sou TikTok'
+    src:'assets/promo/tiktok-1.mp4'
   },
   {
     type:'video',
-    src:'assets/promo/tiktok-2.mp4',
-    eyebrow:'Sou TikTok'
+    src:'assets/promo/tiktok-2.mp4'
   }
   // Egzanp pou ajoute yon slide ak yon vrè foto oswa videyo:
   // { type:'image', src:'promo/salon.jpg', eyebrow:'Nou Fyè', title:'Ekip Linsa Salon', text:'' },
