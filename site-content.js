@@ -56,8 +56,8 @@ const PROMO_SLIDES = [
     text:'Rele nou nan 38896200 / 34616287 pou rezève plas ou.'
   },
   {
-    type:'tiktok',
-    url:'https://www.tiktok.com/t/ZP8TyR5ay/',
+    type:'video',
+    src:'assets/promo/tiktok-1.mp4',
     eyebrow:'Sou TikTok'
   },
   {

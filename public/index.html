@@ -219,6 +219,20 @@ a.phone-link:hover{border-bottom-style:solid;}
 .form-error{color:var(--danger);font-size:.85rem;min-height:18px;text-align:center;}
 
 footer{text-align:center;padding:24px;color:var(--text-dim);font-size:.8rem;border-top:1px solid var(--line);}
+.music-toggle{
+  position:fixed;bottom:20px;left:20px;z-index:50;width:52px;height:52px;border-radius:50%;
+  background:linear-gradient(135deg,var(--or),var(--or-clair));color:var(--noir-prune);
+  font-size:1.3rem;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 18px rgba(224,24,154,.4);
+}
+.music-toggle.playing{animation:music-pulse 1.6s ease-in-out infinite;}
+@keyframes music-pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+.video-unmute-btn{
+  display:none;position:absolute;right:20px;bottom:14px;z-index:3;
+  background:rgba(11,9,8,.72);color:#fff;border:1px solid rgba(255,255,255,.3);
+  width:36px;height:36px;border-radius:50%;align-items:center;justify-content:center;font-size:1rem;
+}
+.video-unmute-btn.show{display:flex;}
 </style>
 </head>
 <body>
@@ -240,6 +254,7 @@ footer{text-align:center;padding:24px;color:var(--text-dim);font-size:.8rem;bord
   <div class="promo-nav" onclick="nextPromoSlide()"></div>
   <div class="promo-dots" id="promo-dots"></div>
   <a href="#" class="promo-link-btn" id="promo-link-btn" target="_blank" rel="noopener">Gade →</a>
+  <button type="button" class="video-unmute-btn" id="video-unmute-btn" aria-label="Aktive/dezaktive son videyo a" onclick="toggleVideoSound()">🔇</button>
 </div>
 
 <div class="jobs-wrap hidden" id="jobs-wrap">
@@ -315,6 +330,9 @@ footer{text-align:center;padding:24px;color:var(--text-dim);font-size:.8rem;bord
 
 <footer>Linsa Salon de Beauté · 📍 Rue Albert Jode, Siloe #69, Delmas 75 · 📞 <a class="phone-link" href="https://wa.me/50938896200" target="_blank" rel="noopener">3889-6200</a> / <a class="phone-link" href="https://wa.me/50934616287" target="_blank" rel="noopener">3461-6287</a></footer>
 
+<audio id="bg-music" src="assets/audio/bg-music.mp3" loop preload="none"></audio>
+<button type="button" id="music-toggle" class="music-toggle" aria-label="Mizik background">🎵</button>
+
 <script src="services.js"></script>
 <script src="site-content.js"></script>
 <script src="firebase-config.js"></script>
@@ -380,6 +398,7 @@ function renderPromoSlides(){
   dots.innerHTML = activeSlides.map((_, i) => `<div class="promo-dot ${i===0?'active':''}"></div>`).join('');
   updatePromoLinkBtn();
   updateTiktokBannerHeight();
+  updateVideoUnmuteBtn();
   if(window.tiktokEmbed && window.tiktokEmbed.lib && window.tiktokEmbed.lib.render){
     window.tiktokEmbed.lib.render(document.querySelectorAll('.tiktok-embed'));
   }
@@ -393,6 +412,27 @@ function updateTiktokBannerHeight(){
   const banner = document.getElementById('promo-banner');
   const slide = activeSlides && activeSlides[promoIndex];
   banner.classList.toggle('tiktok-active', !!(slide && slide.type === 'tiktok'));
+}
+
+/* Videyo pwomosyon yo dwe kòmanse "muted" pou navigatè a kite yo autoplay,
+   men yo gen pwòp mizik yo ladan — bouton sa a kite moun aktive son an. */
+function updateVideoUnmuteBtn(){
+  const btn = document.getElementById('video-unmute-btn');
+  const slide = activeSlides && activeSlides[promoIndex];
+  if(slide && slide.type === 'video'){
+    btn.classList.add('show');
+    const videoEl = document.querySelector('.promo-slide.active video');
+    btn.textContent = (videoEl && !videoEl.muted) ? '🔊' : '🔇';
+  } else {
+    btn.classList.remove('show');
+  }
+}
+
+function toggleVideoSound(){
+  const videoEl = document.querySelector('.promo-slide.active video');
+  if(!videoEl) return;
+  videoEl.muted = !videoEl.muted;
+  document.getElementById('video-unmute-btn').textContent = videoEl.muted ? '🔇' : '🔊';
 }
 
 function updatePromoLinkBtn(){
@@ -416,6 +456,7 @@ function showPromoSlide(index){
   dots.forEach((el,i) => el.classList.toggle('active', i===promoIndex));
   updatePromoLinkBtn();
   updateTiktokBannerHeight();
+  updateVideoUnmuteBtn();
 }
 
 function nextPromoSlide(){
@@ -712,6 +753,25 @@ function resetForm(){
   updateHoursHint();
   document.querySelectorAll('.svc-row').forEach(r => r.classList.remove('selected'));
 }
+
+/* MIZIK BACKGROUND — pa gen autoplay ak son san yon aksyon moun (navigatè
+   yo bloke sa), donk bouton an kòmanse an "pa jwe" e kliyan dwe klike pou
+   li kòmanse. */
+(function initMusicToggle(){
+  const btn = document.getElementById('music-toggle');
+  const audio = document.getElementById('bg-music');
+  btn.addEventListener('click', function(){
+    if(audio.paused){
+      audio.play().then(function(){
+        btn.classList.add('playing');
+        btn.textContent = '🎵';
+      }).catch(function(){});
+    } else {
+      audio.pause();
+      btn.classList.remove('playing');
+    }
+  });
+})();
 
 startPromoSync();
 renderJobs();

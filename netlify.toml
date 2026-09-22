@@ -1,6 +1,6 @@
 [build]
   publish = "dist"
-  command = "rm -rf dist && mkdir -p dist/assets && cp -r ${TARGET:-public}/. dist/ && cp services.js site-content.js firebase-config.js dist/ && cp assets/logo.webp assets/hero-bg.webp dist/assets/"
+  command = "rm -rf dist && mkdir -p dist/assets && cp -r ${TARGET:-public}/. dist/ && cp services.js site-content.js firebase-config.js dist/ && cp assets/logo.webp assets/hero-bg.webp dist/assets/ && cp -r assets/promo dist/assets/ && cp -r assets/audio dist/assets/"
 
 [[redirects]]
   from = "/*"
