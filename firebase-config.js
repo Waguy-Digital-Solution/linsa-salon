@@ -23,12 +23,12 @@
    ak localStorage sèlman (chak aparèy separe), tankou anvan.
 ============================================================ */
 const FIREBASE_CONFIG = {
-  apiKey: "REMPLACE_MWEN",
-  authDomain: "REMPLACE_MWEN.firebaseapp.com",
-  projectId: "REMPLACE_MWEN",
-  storageBucket: "REMPLACE_MWEN.appspot.com",
-  messagingSenderId: "REMPLACE_MWEN",
-  appId: "REMPLACE_MWEN"
+  apiKey: "AIzaSyD2eZXWNBdrKpctZG-E7Gv5h0p8Td0GIBk",
+  authDomain: "linsa-salon.firebaseapp.com",
+  projectId: "linsa-salon",
+  storageBucket: "linsa-salon.firebasestorage.app",
+  messagingSenderId: "633678693483",
+  appId: "1:633678693483:web:39bdab173534c400b21d2e"
 };
 
 let _linsaDb = null;
