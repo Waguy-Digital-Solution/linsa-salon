@@ -227,13 +227,18 @@ a.phone-link:hover{border-bottom-style:solid;}
 
 footer{text-align:center;padding:24px;color:var(--text-dim);font-size:.8rem;border-top:1px solid var(--line);}
 .music-toggle{
-  position:fixed;bottom:20px;left:20px;z-index:50;width:52px;height:52px;border-radius:50%;
-  background:linear-gradient(135deg,var(--or),var(--or-clair));color:var(--noir-prune);
-  font-size:1.3rem;display:flex;align-items:center;justify-content:center;
-  box-shadow:0 6px 18px rgba(224,24,154,.4);
+  position:fixed;bottom:16px;left:16px;z-index:50;width:36px;height:36px;border-radius:50%;
+  background:rgba(22,18,16,.72);border:1px solid rgba(224,181,120,.55);color:var(--or);
+  font-size:.85rem;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 12px rgba(0,0,0,.35);backdrop-filter:blur(4px);
+  opacity:.8;transition:opacity .2s ease,transform .2s ease,background .2s ease,color .2s ease;
 }
-.music-toggle.playing{animation:music-pulse 1.6s ease-in-out infinite;}
-@keyframes music-pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+.music-toggle:hover{opacity:1;transform:scale(1.08);}
+.music-toggle.playing{
+  opacity:1;background:linear-gradient(135deg,var(--or),var(--or-clair));color:var(--noir-prune);
+  border-color:transparent;animation:music-pulse 1.8s ease-in-out infinite;
+}
+@keyframes music-pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
 </style>
 </head>
 <body>
