@@ -56,20 +56,14 @@ const PROMO_SLIDES = [
     text:'Rele nou nan 38896200 / 34616287 pou rezève plas ou.'
   },
   {
-    type:'gradient',
-    gradient:'linear-gradient(135deg,#161210 0%,#5E0A3E 100%)',
-    eyebrow:'Sou TikTok',
-    title:'Gade dènye videyo nou an',
-    text:'Klike pou wè travay nou sou TikTok.',
-    link:'https://www.tiktok.com/t/ZP8TyR5ay/'
+    type:'tiktok',
+    url:'https://www.tiktok.com/t/ZP8TyR5ay/',
+    eyebrow:'Sou TikTok'
   },
   {
-    type:'gradient',
-    gradient:'linear-gradient(135deg,#241E19 0%,#E0189A 100%)',
-    eyebrow:'Sou TikTok',
-    title:'Yon lòt videyo pou ou',
-    text:'Klike pou wè plis videyo sou TikTok.',
-    link:'https://www.tiktok.com/t/ZP8TUnWJb/'
+    type:'tiktok',
+    url:'https://www.tiktok.com/t/ZP8TUnWJb/',
+    eyebrow:'Sou TikTok'
   }
   // Egzanp pou ajoute yon slide ak yon vrè foto oswa videyo:
   // { type:'image', src:'promo/salon.jpg', eyebrow:'Nou Fyè', title:'Ekip Linsa Salon', text:'' },
