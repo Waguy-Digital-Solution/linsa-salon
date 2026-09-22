@@ -10,6 +10,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qz-tray@2.2.4/qz-tray.js"></script>
 <style>
 :root{
   --noir-prune:#161210;
@@ -402,6 +403,13 @@ input{font-family:inherit;}
 .promo-current-item .info .t{font-weight:700;font-size:.9rem;}
 .promo-current-item .info .s{font-size:.75rem;color:var(--text-dim);}
 .promo-current-item .del{color:var(--danger);font-size:1rem;padding:6px;flex:0 0 auto;}
+.drawer-form{display:flex;flex-direction:column;gap:6px;margin-top:14px;max-width:420px;}
+.drawer-form label{font-size:.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;margin-top:8px;}
+.drawer-form select,.drawer-form input[type="text"]{
+  background:var(--noir-prune);border:1px solid var(--line);border-radius:8px;color:var(--text);
+  padding:10px 12px;font-size:.9rem;outline:none;
+}
+.drawer-status{font-size:.85rem;color:var(--or-clair);margin-top:12px;}
 .todo-list{list-style:none;margin-top:10px;}
 .todo-list li{padding:8px 0;border-bottom:1px solid var(--line);font-size:.88rem;color:var(--text-dim);display:flex;gap:10px;}
 .todo-list li .num{color:var(--or);font-weight:700;}
@@ -607,6 +615,22 @@ input{font-family:inherit;}
           <button class="btn-primary" style="margin-top:10px;" onclick="uploadPromo()" id="promo-upload-btn">Telechaje & Pibliye</button>
         </div>
         <div class="promo-current-list" id="promo-current-list"></div>
+      </div>
+      <div class="admin-card">
+        <h3>🗄️ Tiwa Lajan (Cash Drawer)</h3>
+        <p>Konekte yon tiwa lajan fizik ki konekte ak yon enprimant resi (egzanp Epson TM-T20III) pa QZ Tray, pou l louvri otomatikman lè yon vant an Cash konfime. Ou dwe enstale <a href="https://qz.io/download/" target="_blank" rel="noopener" style="color:var(--or);">QZ Tray</a> sou òdinatè kès la anvan.</p>
+        <div class="drawer-form">
+          <label>Aktive louvèti otomatik</label>
+          <select id="drawer-enabled">
+            <option value="0">Dezaktive</option>
+            <option value="1">Aktive</option>
+          </select>
+          <label>Non enprimant lan (jan QZ Tray rekonèt li)</label>
+          <input type="text" id="drawer-printer" placeholder="Egzanp: EPSON TM-T20III Receipt">
+          <button class="btn-primary" style="margin-top:10px;" onclick="saveDrawerSettings()">Sove Paramèt</button>
+          <button class="btn-logout" style="margin-top:8px;" onclick="testCashDrawer()">🔓 Teste Louvri Tiwa a</button>
+        </div>
+        <div class="drawer-status" id="drawer-status"></div>
       </div>
       <div class="admin-card">
         <h3>Done Lokal</h3>
@@ -871,7 +895,7 @@ function switchView(view){
   document.getElementById('view-'+view).classList.add('active');
   if(view==='clients') renderClients();
   if(view==='rapports') renderReports();
-  if(view==='admin'){ updateAdminInfo(); startPromosAdminSync(); }
+  if(view==='admin'){ updateAdminInfo(); startPromosAdminSync(); initDrawerSettingsForm(); }
   if(view==='rendezvous'){ startAppointmentsSync(); renderAppointments(); }
 }
 
@@ -1134,6 +1158,7 @@ function confirmPayment(){
 
   document.getElementById('screen-payment').classList.remove('active');
   showReceipt(sale);
+  if(sale.method === 'cash') tryOpenCashDrawerOnCashSale();
 }
 
 /* ============================================================
@@ -1482,6 +1507,90 @@ async function deletePromo(id, storagePath){
   if(!confirm('Efase pwomosyon sa a sou paj piblik la?')) return;
   try{ await linsaDeletePromo(id, storagePath || null); }
   catch(e){ showToast('Erè: pa t ka efase pwomosyon an'); }
+}
+
+/* ============================================================
+   TIWA LAJAN (CASH DRAWER) — pa QZ Tray
+   QZ Tray se yon lojisyèl gratis ki enstale sou òdinatè kès la, ki
+   fè pon ant navigatè a ak yon enprimant resi (egzanp Epson TM-T20III)
+   ki konekte ak yon tiwa lajan fizik pa yon kab RJ11.
+   Telechaje QZ Tray: https://qz.io/download/
+============================================================ */
+const ESC_POS_OPEN_DRAWER = '\x1B\x70\x00\x19\xFA';
+let qzConnected = false;
+
+function loadDrawerSettings(){
+  try { return JSON.parse(localStorage.getItem('linsa_drawer_settings') || '{}'); }
+  catch(e){ return {}; }
+}
+
+function saveDrawerSettings(){
+  const enabled = document.getElementById('drawer-enabled').value === '1';
+  const printer = document.getElementById('drawer-printer').value.trim();
+  localStorage.setItem('linsa_drawer_settings', JSON.stringify({ enabled, printer }));
+  showToast('Paramèt tiwa lajan sove');
+  renderDrawerStatus();
+}
+
+function initDrawerSettingsForm(){
+  const s = loadDrawerSettings();
+  const enabledSel = document.getElementById('drawer-enabled');
+  const printerInput = document.getElementById('drawer-printer');
+  if(!enabledSel) return;
+  enabledSel.value = s.enabled ? '1' : '0';
+  printerInput.value = s.printer || '';
+  renderDrawerStatus();
+}
+
+function renderDrawerStatus(){
+  const el = document.getElementById('drawer-status');
+  if(!el) return;
+  const s = loadDrawerSettings();
+  if(!s.enabled){
+    el.textContent = '⚪ Tiwa lajan otomatik dezaktive.';
+  } else if(!s.printer){
+    el.textContent = '⚠️ Aktive men non enprimant lan pa ranpli.';
+  } else if(typeof qz === 'undefined'){
+    el.textContent = '⚠️ Lib QZ Tray pa chaje (verifye koneksyon entènèt la).';
+  } else {
+    el.textContent = '🟢 Konfigire pou enprimant: ' + s.printer + ' — QZ Tray dwe ap kouri sou òdinatè a.';
+  }
+}
+
+async function qzEnsureConnected(){
+  if(typeof qz === 'undefined') throw new Error('qz-tray-not-loaded');
+  if(qz.websocket.isActive()) return;
+  if(!qz.security.getCertificatePromise()){
+    qz.security.setCertificatePromise(function(resolve){ resolve(); });
+    qz.security.setSignatureAlgorithm('SHA512');
+    qz.security.setSignaturePromise(function(){ return function(resolve){ resolve(); }; });
+  }
+  await qz.websocket.connect();
+}
+
+async function qzOpenDrawer(printerName){
+  await qzEnsureConnected();
+  const config = qz.configs.create(printerName);
+  await qz.print(config, [{ type: 'raw', format: 'command', data: ESC_POS_OPEN_DRAWER }]);
+}
+
+async function testCashDrawer(){
+  const s = loadDrawerSettings();
+  if(!s.printer){ showToast('Antre non enprimant lan dabò'); return; }
+  try{
+    await qzOpenDrawer(s.printer);
+    showToast('Kòmand voye bay tiwa a ✅');
+  } catch(e){
+    console.error(e);
+    showToast('Erè: pa t ka konekte ak QZ Tray');
+  }
+}
+
+async function tryOpenCashDrawerOnCashSale(){
+  const s = loadDrawerSettings();
+  if(!s.enabled || !s.printer) return;
+  try{ await qzOpenDrawer(s.printer); }
+  catch(e){ console.warn('Tiwa lajan pa t ka louvri:', e); }
 }
 
 /* ============================================================
