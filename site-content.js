@@ -7,15 +7,18 @@
 ============================================================ */
 
 /* HÈ AK JOU OUVÈTI SALON AN — itilize pou anpeche kliyan pran randevou
-   deyò lè travay yo. 24h fòma ("HH:MM"). Mete null pou yon jou fèmen. */
+   deyò lè travay yo. 24h fòma ("HH:MM"). Mete null pou yon jou fèmen.
+   Salon an ouvè tout 7 jou nan semèn nan; lè ka pwolonje pi ta selon
+   sikonstans (evènman, randevou espesyal, elatriye) — chanje isit la
+   si sa rive vin regilye. */
 const BUSINESS_HOURS = {
-  0: null,               // Dimanch — fèmen
-  1: { open:'08:00', close:'18:00' }, // Lendi
-  2: { open:'08:00', close:'18:00' }, // Madi
-  3: { open:'08:00', close:'18:00' }, // Mèkredi
-  4: { open:'08:00', close:'18:00' }, // Jedi
-  5: { open:'08:00', close:'19:00' }, // Vandredi
-  6: { open:'08:00', close:'19:00' }  // Samdi
+  0: { open:'09:00', close:'18:00' }, // Dimanch
+  1: { open:'09:00', close:'18:00' }, // Lendi
+  2: { open:'09:00', close:'18:00' }, // Madi
+  3: { open:'09:00', close:'18:00' }, // Mèkredi
+  4: { open:'09:00', close:'18:00' }, // Jedi
+  5: { open:'09:00', close:'18:00' }, // Vandredi
+  6: { open:'09:00', close:'18:00' }  // Samdi
 };
 
 /* Dire estanda (an minit) yo itilize pou tcheke doub-rezèvasyon —
