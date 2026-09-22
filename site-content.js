@@ -35,7 +35,7 @@ const DEFAULT_SERVICE_DURATION_MIN = 45;
 const PROMO_SLIDES = [
   {
     type:'image',
-    src:'assets/promo/promo-slide1.webp',
+    src:'assets/promo/slide-01-rabe-lace.webp',
     eyebrow:'Pwomosyon Mwa a',
     title:'Rabè 15% sou tout Lace',
     text:'Aplikasyon, kontou ak koafi lace — valab jiska 30 septanm 2026.',
@@ -43,14 +43,14 @@ const PROMO_SLIDES = [
   },
   {
     type:'image',
-    src:'assets/promo/promo-slide2.webp',
+    src:'assets/promo/slide-02-pose-ongles-design.webp',
     eyebrow:'Nouvo Sèvis',
     title:'Pose Ongles Design',
     text:'Kolòri, efè chrome ak perles French — soti 2 000 Gdes.'
   },
   {
     type:'image',
-    src:'assets/promo/promo-slide3.webp',
+    src:'assets/promo/slide-03-pran-randevou.webp',
     eyebrow:'Randevou',
     title:'Pran Randevou w Alavans',
     text:'Rele nou nan 38896200 / 34616287 pou rezève plas ou.'
