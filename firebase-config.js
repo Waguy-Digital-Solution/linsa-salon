@@ -93,6 +93,23 @@ async function linsaAddAppointment(appt){
   }));
 }
 
+/* Tcheke si gen deja yon lòt randevou (pa anile) nan menm dat/lè a —
+   itilize anvan soumèt pou anpeche doub-rezèvasyon. Retounen true si pran. */
+async function linsaCheckSlotTaken(date, time){
+  const db = linsaInitFirebase();
+  if(!db) return false;
+  const snap = await db.collection('appointments')
+    .where('date', '==', date)
+    .where('time', '==', time)
+    .get();
+  let taken = false;
+  snap.forEach(function(doc){
+    const d = doc.data();
+    if(d.status !== 'anile') taken = true;
+  });
+  return taken;
+}
+
 async function linsaDeleteAppointment(id){
   const db = linsaInitFirebase();
   if(!db) throw new Error('firebase-not-configured');

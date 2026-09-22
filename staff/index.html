@@ -10,6 +10,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qz-tray@2.2.4/qz-tray.js"></script>
 <style>
 :root{
@@ -673,9 +674,15 @@ input{font-family:inherit;}
    (CATEGORIES, SERVICES, servicePriceLabel(), formatHTG() soti nan services.js —
     firebase-config.js bay fonksyon senkwonizasyon randevou yo)
 ============================================================ */
+/* authEmail/authPassword: kont Firebase Authentication (Email/Password)
+   ki dwe kreye nan Firebase Console → Authentication → Users, ak
+   MENM valè yo mete anba a. Sa pèmèt règ sekirite Firestore yo bloke
+   piblik la pou l pa ka li randevou kliyan yo, pandan app kès la
+   (ki konekte otomatikman apre PIN kòrèk) toujou gen aksè. Chanje
+   modpas yo si w vle — jis kenbe yo senkwonize ak Firebase Console. */
 const USERS = {
-  linsa: { name:'Linsa',  role:'admin',    pin:'1234' },
-  marie: { name:'Marie', role:'cashier',  pin:'0000' }
+  linsa: { name:'Linsa',  role:'admin',    pin:'1234', authEmail:'linsa@linsa-salon.local', authPassword:'Linsa-Staff-9214' },
+  marie: { name:'Marie', role:'cashier',  pin:'0000', authEmail:'marie@linsa-salon.local', authPassword:'Marie-Staff-7530' }
 };
 
 const PAYMENT_METHODS = [
@@ -870,6 +877,20 @@ function login(userId){
   switchView('caisse');
   updateAdminInfo();
   clearInterval(promoTimer);
+  linsaStaffSignIn(user);
+}
+
+/* Konekte ak Firebase Authentication apre PIN kòrèk, pou règ sekirite
+   Firestore yo ka rekonèt aparèy sa a kòm "staff" (request.auth != null).
+   Si kont la poko kreye nan Firebase Console, sa ap echwe an silans —
+   app la ap kontinye fonksyone men lekti/ekri Firestore ap bloke pa
+   règ yo jiskaske kont lan kreye (gade nòt nan firestore.rules). */
+function linsaStaffSignIn(user){
+  if(!linsaFirebaseConfigured() || typeof firebase === 'undefined' || !firebase.auth) return;
+  try{
+    firebase.auth().signInWithEmailAndPassword(user.authEmail, user.authPassword)
+      .catch(function(err){ console.warn('Firebase Auth (staff) pa konekte:', err.code || err.message); });
+  } catch(e){ console.warn('Firebase Auth (staff) erè:', e); }
 }
 
 function logout(){

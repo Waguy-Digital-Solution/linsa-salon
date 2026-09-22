@@ -19,9 +19,9 @@ const CATEGORIES = [
 /* price: number (fixed) | {min,max} (range) | null (à définir au moment de la vente) */
 const SERVICES = [
   /* ===== MANUCURE & PÉDICURE ===== */
-  { id:1,  cat:'manucure', name:'Manicure',                              price:500 },
+  { id:1,  cat:'manucure', name:'Manucure',                              price:500 },
   { id:2,  cat:'manucure', name:'Pédicure',                              price:500 },
-  { id:3,  cat:'manucure', name:'Pédicure pose',                         price:1500 },
+  { id:3,  cat:'manucure', name:'Pédicure Pose (Gel/Vernis)',            price:1500 },
   { id:4,  cat:'manucure', name:'Pédicure French',                       price:1750 },
   { id:5,  cat:'manucure', name:'Pédicure Design',                       price:2000 },
 
@@ -48,7 +48,7 @@ const SERVICES = [
   /* ===== TISSAGE & COIFFURES ===== */
   { id:20, cat:'tissage', name:'Tissage cheveux inclus',                 price:10000 },
   { id:21, cat:'tissage', name:'Tissage sans cheveux',                   price:3000 },
-  { id:22, cat:'tissage', name:'Autre tissage',                         price:4000 },
+  { id:22, cat:'tissage', name:'Tissage — Lòt Modèl (kontakte nou pou detay)', price:4000 },
   { id:23, cat:'tissage', name:'Spécial Tara, cheveux inclus',           price:5000 },
   { id:24, cat:'tissage', name:'Soft Locks, cheveux inclus',             price:12500 },
   { id:25, cat:'tissage', name:'Application Lace',                       price:3000 },
@@ -63,15 +63,17 @@ const SERVICES = [
   { id:32, cat:'greff', name:'Lavage Greff',                            price:1500 },
 
   /* ===== CHEVEUX ===== */
+  /* NÒT: "Lavage cheveux naturels" te parèt 2 fwa (2 500 HTG ak 2 000 HTG) —
+     nou kenbe yon sèl antre, 2 500 HTG. Konfime ak pwopriyetè si sa kòrèk. */
   { id:33, cat:'cheveux', name:'Lavage cheveux naturels',                price:2500 },
   { id:34, cat:'cheveux', name:'Coiffure bigoudis',                     price:3000 },
   { id:35, cat:'cheveux', name:'Application texturizer',                price:2000 },
   { id:36, cat:'cheveux', name:'Bain d’huile',                          price:4000 },
   { id:37, cat:'cheveux', name:'Bain de crème',                         price:4000 },
-  { id:38, cat:'cheveux', name:'Coupe',                                 price:600 },
-  { id:39, cat:'cheveux', name:'Coupe simple',                          price:500 },
-  { id:40, cat:'cheveux', name:'Coupe enfant',                          price:500 },
-  { id:41, cat:'cheveux', name:'Coupe simple enfant',                   price:400 },
+  { id:38, cat:'cheveux', name:'Coupe — Salon',                         price:600 },
+  { id:39, cat:'cheveux', name:'Coupe simple — Femme',                  price:500 },
+  { id:40, cat:'cheveux', name:'Coupe enfant — Salon (estanda)',        price:500 },
+  { id:41, cat:'cheveux', name:'Coupe enfant — Salon (senp)',           price:400 },
   { id:42, cat:'cheveux', name:'Coupe femme simple',                    price:1000 },
   { id:43, cat:'cheveux', name:'Coupe femme',                           price:1250 },
   { id:44, cat:'cheveux', name:'Coupe femme Design',                    price:1500 },
@@ -81,7 +83,6 @@ const SERVICES = [
   { id:48, cat:'cheveux', name:'Application permanente + Blow',         price:2500 },
   { id:49, cat:'cheveux', name:'Application permanente simple',         price:1500 },
   { id:50, cat:'cheveux', name:'Lavage cheveux permanente',             price:1500 },
-  { id:51, cat:'cheveux', name:'Lavage cheveux naturels',               price:2000 },
   { id:52, cat:'cheveux', name:'Blow',                                  price:2000 },
 
   /* ===== SOURCILS & BEAUTÉ ===== */
@@ -89,15 +90,17 @@ const SERVICES = [
   { id:54, cat:'visage', name:'Faux cils',                              price:1000 },
 
   /* ===== BARBER SHOP ===== */
-  { id:55, cat:'barber', name:'Coupe simple',                            price:120 },
-  { id:56, cat:'barber', name:'Coupe compliquée',                        price:150 },
-  { id:57, cat:'barber', name:'Coupe enfant',                            price:100 },
+  /* NÒT: pri Barber yo (120 / 150 / 100 HTG) sanble ba anpil parapò ak rès
+     meni a — n ap pibliye yo men yo bezwen konfimasyon ak pwopriyetè a. */
+  { id:55, cat:'barber', name:'Coupe simple — Barber (Homme)',           price:120 },
+  { id:56, cat:'barber', name:'Coupe ak Design — Barber (Homme)',        price:150 },
+  { id:57, cat:'barber', name:'Coupe enfant — Barber',                   price:100 },
   { id:58, cat:'barber', name:'Tresse',                                 price:250 },
   { id:59, cat:'barber', name:'Tresse barbe',                           price:300 },
 
   /* ===== MAQUILLAGE & CILS ===== */
-  { id:60, cat:'maquillage', name:'Makeup simple',                       price:3000 },
-  { id:61, cat:'maquillage', name:'Makeup compliqué',                    price:4000 },
+  { id:60, cat:'maquillage', name:'Maquillage simple',                   price:3000 },
+  { id:61, cat:'maquillage', name:'Maquillage compliqué',                price:4000 },
   { id:62, cat:'maquillage', name:'Extension cils',                      price:1500 }
 ];
 

@@ -6,16 +6,35 @@
    kòd HTML/JS lòt kote.
 ============================================================ */
 
+/* HÈ AK JOU OUVÈTI SALON AN — itilize pou anpeche kliyan pran randevou
+   deyò lè travay yo. 24h fòma ("HH:MM"). Mete null pou yon jou fèmen. */
+const BUSINESS_HOURS = {
+  0: null,               // Dimanch — fèmen
+  1: { open:'08:00', close:'18:00' }, // Lendi
+  2: { open:'08:00', close:'18:00' }, // Madi
+  3: { open:'08:00', close:'18:00' }, // Mèkredi
+  4: { open:'08:00', close:'18:00' }, // Jedi
+  5: { open:'08:00', close:'19:00' }, // Vandredi
+  6: { open:'08:00', close:'19:00' }  // Samdi
+};
+
+/* Dire estanda (an minit) yo itilize pou tcheke doub-rezèvasyon —
+   yon fwa yo gen orè pi presi pou chak sèvis, ranplase valè sa a. */
+const DEFAULT_SERVICE_DURATION_MIN = 45;
+
 /* ESPAS PIB — pwomosyon/anons.
    Chak slide ka: 'gradient' (koulè, pa gen bezwen imaj),
-   'image' (yon foto — bay 'src'), oswa 'video' (yon klip — bay 'src'). */
+   'image' (yon foto — bay 'src'), oswa 'video' (yon klip — bay 'src').
+   'expiresAt': dat 'YYYY-MM-DD' opsyonèl — slide a disparèt otomatikman
+   apre dat sa a (pa gen bezwen retire l manyèlman). */
 const PROMO_SLIDES = [
   {
     type:'gradient',
     gradient:'linear-gradient(135deg,#E0189A 0%,#5E0A3E 100%)',
     eyebrow:'Pwomosyon Mwa a',
     title:'Rabè 15% sou tout Lace',
-    text:'Aplikasyon, kontou ak koafi lace — pwofite rabè a jiska fen mwa a.'
+    text:'Aplikasyon, kontou ak koafi lace — valab jiska 30 septanm 2026.',
+    expiresAt:'2026-09-30'
   },
   {
     type:'gradient',
@@ -35,6 +54,12 @@ const PROMO_SLIDES = [
   // { type:'image', src:'promo/salon.jpg', eyebrow:'Nou Fyè', title:'Ekip Linsa Salon', text:'' },
   // { type:'video', src:'promo/demo.mp4', eyebrow:'Videyo', title:'Dekouvri Salon nou an', text:'' },
 ];
+
+/* Retire otomatikman nenpòt slide ki gen yon 'expiresAt' ki nan tan pase. */
+function filterActivePromos(list){
+  const today = new Date().toISOString().slice(0,10);
+  return (list || []).filter(s => !s.expiresAt || s.expiresAt >= today);
+}
 
 /* REKRITMAN — lis pòs travay ki disponib kounye a.
    Kite tablo a vid ([]) lè pa gen okenn ofri — seksyon an ap kache
