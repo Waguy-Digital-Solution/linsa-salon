@@ -127,31 +127,24 @@ a.phone-link:hover{border-bottom-style:solid;}
 .cat-tabs-wrap{position:relative;margin-bottom:14px;}
 .cat-tabs{
   display:flex;flex-wrap:nowrap;gap:8px;width:100%;min-width:0;overflow-x:auto;
-  scroll-behavior:smooth;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;
-  touch-action:pan-x;padding:2px 2px 10px;
+  -webkit-overflow-scrolling:touch;touch-action:pan-x;padding:2px 2px 10px;
 }
 .cat-tabs::-webkit-scrollbar{height:5px;}
 .cat-tabs::-webkit-scrollbar-thumb{background:var(--line);border-radius:5px;}
 .cat-tab{
-  flex:0 0 auto;scroll-snap-align:start;background:var(--panel-2);border:1px solid var(--line);color:var(--text-dim);
+  flex:0 0 auto;background:var(--panel-2);border:1px solid var(--line);color:var(--text-dim);
   padding:8px 14px;border-radius:20px;font-size:.8rem;font-weight:600;white-space:nowrap;transition:.15s;
 }
 .cat-tab.active{background:var(--or);border-color:var(--or);color:var(--noir-prune);}
 .cat-tab:hover{border-color:var(--or);}
-.cat-scroll-btn{
-  position:absolute;top:0;bottom:10px;width:34px;display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(90deg, var(--panel) 40%, rgba(36,30,25,0));color:var(--text);
-  border:none;font-size:1.1rem;z-index:2;opacity:0;pointer-events:none;transition:opacity .15s;
+/* Endikasyon vizyèl (fade) pou moun konprann gen plis kategori pou wè —
+   san okenn eleman ki ka bloke jès swipe a. */
+.cat-tabs-wrap::after{
+  content:'';position:absolute;top:0;right:0;bottom:10px;width:28px;
+  background:linear-gradient(270deg, var(--panel) 15%, rgba(36,30,25,0));
+  pointer-events:none;opacity:0;transition:opacity .15s;
 }
-.cat-scroll-btn.right{right:0;background:linear-gradient(270deg, var(--panel) 40%, rgba(36,30,25,0));}
-.cat-scroll-btn.left{left:0;}
-.cat-scroll-btn.show{opacity:1;}
-/* Sèlman aktive klike-pou-defile a pou aparèy ak yon sourit (dispozitif "fin"
-   pointer) — sou telefòn/tablèt, bouton yo rete vizib men pa entèsepte jès
-   swipe dwèt la, ki se fason prensipal moun defile sou touch. */
-@media (hover:hover) and (pointer:fine){
-  .cat-scroll-btn.show{pointer-events:auto;}
-}
+.cat-tabs-wrap.has-more::after{opacity:1;}
 
 /* ============ SERVICES LIST ============ */
 .cat-group{margin-bottom:22px;}
@@ -247,10 +240,8 @@ footer{text-align:center;padding:24px;color:var(--text-dim);font-size:.8rem;bord
     <h2>Sèvis nou yo</h2>
     <div class="desc">Pri yo an Goud (HTG). Klike sou yon sèvis pou chwazi l dirèkteman nan fòm randevou a.</div>
     <input type="search" id="svc-search" class="svc-search" placeholder="🔍 Chèche yon sèvis (egzanp: lace, coupe, manucure...)">
-    <div class="cat-tabs-wrap">
+    <div class="cat-tabs-wrap" id="cat-tabs-wrap">
       <div class="cat-tabs" id="cat-tabs"></div>
-      <button type="button" class="cat-scroll-btn left" id="cat-scroll-left" aria-label="Kategori anvan">‹</button>
-      <button type="button" class="cat-scroll-btn right" id="cat-scroll-right" aria-label="Lòt kategori">›</button>
     </div>
     <div id="services-list"></div>
   </div>
@@ -479,29 +470,21 @@ function renderCatTabs(){
       if(activeBtn) activeBtn.scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
     });
   });
-  updateCatScrollButtons();
+  updateCatFadeHint();
 }
 
-/* Bouton ‹ › + endikasyon (fade) pou moun konprann yo ka fè tab yo
-   defile — swiv ak dwèt (touch) OSWA klike sou flèch yo. */
-function updateCatScrollButtons(){
+/* Endikasyon vizyèl (fade) pou moun konprann gen plis kategori pou wè —
+   pa gen okenn eleman entèaktif ki ka bloke jès swipe a. */
+function updateCatFadeHint(){
   const tabs = document.getElementById('cat-tabs');
-  const btnLeft = document.getElementById('cat-scroll-left');
-  const btnRight = document.getElementById('cat-scroll-right');
-  if(!tabs || !btnLeft || !btnRight) return;
+  const wrap = document.getElementById('cat-tabs-wrap');
+  if(!tabs || !wrap) return;
   const maxScroll = tabs.scrollWidth - tabs.clientWidth;
-  btnLeft.classList.toggle('show', tabs.scrollLeft > 8);
-  btnRight.classList.toggle('show', tabs.scrollLeft < maxScroll - 8);
+  wrap.classList.toggle('has-more', tabs.scrollLeft < maxScroll - 8);
 }
 
-document.getElementById('cat-tabs').addEventListener('scroll', updateCatScrollButtons);
-window.addEventListener('resize', updateCatScrollButtons);
-document.getElementById('cat-scroll-left').addEventListener('click', function(){
-  document.getElementById('cat-tabs').scrollBy({ left: -180, behavior: 'smooth' });
-});
-document.getElementById('cat-scroll-right').addEventListener('click', function(){
-  document.getElementById('cat-tabs').scrollBy({ left: 180, behavior: 'smooth' });
-});
+document.getElementById('cat-tabs').addEventListener('scroll', updateCatFadeHint);
+window.addEventListener('resize', updateCatFadeHint);
 
 function renderServicesList(){
   const container = document.getElementById('services-list');
