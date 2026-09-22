@@ -22,7 +22,7 @@ const PROMO_SLIDES = [
     gradient:'linear-gradient(135deg,#3A2E24 0%,#161210 100%)',
     eyebrow:'Randevou',
     title:'Pran Randevou w Alavans',
-    text:'Rele nou nan [NIMEWO TELEFÒN OU] pou reyève plas ou.'
+    text:'Rele nou nan [NIMEWO TELEFÒN OU] pou rezève plas ou.'
   }
   // Egzanp pou ajoute yon slide ak yon vrè foto oswa videyo:
   // { type:'image', src:'promo/foto.jpg', eyebrow:'Nou Fyè', title:'Ekip Nou an', text:'' },
