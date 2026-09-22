@@ -74,7 +74,7 @@ function linsaSubscribeAppointments(callback){
   const db = linsaInitFirebase();
   if(!db){ callback(null); return function(){}; }
   return db.collection('appointments')
-    .orderBy('date').orderBy('time')
+    .orderBy('date')
     .onSnapshot(function(snap){
       const list = [];
       snap.forEach(function(doc){ list.push(Object.assign({ id: doc.id }, doc.data())); });
