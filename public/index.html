@@ -544,7 +544,8 @@ function isWithinBusinessHours(dateStr, timeStr){
   if(isNaN(d.getTime())) return false;
   const hours = BUSINESS_HOURS[d.getDay()];
   if(!hours) return false;
-  return timeStr >= hours.open && timeStr <= hours.close;
+  const t = timeStr.slice(0, 5); // gad kont valè ak segond ("HH:MM:SS")
+  return t >= hours.open && t <= hours.close;
 }
 
 function updateHoursHint(){
@@ -671,8 +672,15 @@ function populateServiceSelect(){
   }).join('');
 }
 
+function localDateStr(d){
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 function todayStr(){
-  return new Date().toISOString().slice(0,10);
+  return localDateStr(new Date());
 }
 
 /* ============================================================
