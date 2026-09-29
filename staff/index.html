@@ -314,6 +314,18 @@ input{font-family:inherit;}
 .btn-print{background:var(--noir-prune);color:var(--blanc-rose);}
 .btn-newsale{background:var(--or);color:var(--noir-prune);}
 
+/* Fòma pou enprimant tèmik 80mm (egzanp: HOIN 80mm USB/LAN/BT/WiFi) */
+@page{ size:80mm auto; margin:0; }
+@media print{
+  body *{ visibility:hidden; }
+  .receipt-paper, .receipt-paper *{ visibility:visible; }
+  .receipt-paper{
+    position:absolute; top:0; left:0; width:80mm; max-width:80mm; max-height:none;
+    box-shadow:none; border-radius:0; padding:3mm 4mm; overflow:visible;
+  }
+  .receipt-actions{ display:none !important; }
+}
+
 /* ============ RENDEZ-VOUS ============ */
 #view-rendezvous{display:none;flex:1;padding:24px 30px;overflow:hidden;}
 #view-rendezvous.active{display:flex;}
