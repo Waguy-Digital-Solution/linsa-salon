@@ -1287,8 +1287,78 @@ function confirmPayment(){
 }
 
 /* ============================================================
-   RECEIPT
+   RECEIPT — enprime via RawBT (tèks senp, pa imaj)
+   Sa evite banyè "vèsyon gratis" RawBT a ak gwo espas blan ki
+   parèt lè yo enprime yon paj HTML antye kòm yon imaj via
+   window.print(). Nou voye tèks dirèkteman bay RawBT atravè
+   lyen 'rawbt:base64,...' la.
 ============================================================ */
+const RECEIPT_WIDTH = 42; // karaktè pa liy, estanda pou enprimant 80mm
+
+function padRight(s, n){ s = String(s); return s.length >= n ? s.slice(0, n) : s + ' '.repeat(n - s.length); }
+function padLeft(s, n){ s = String(s); return s.length >= n ? s.slice(0, n) : ' '.repeat(n - s.length) + s; }
+function centerText(s, n){
+  s = String(s);
+  if(s.length >= n) return s.slice(0, n);
+  const total = n - s.length, left = Math.floor(total / 2);
+  return ' '.repeat(left) + s + ' '.repeat(total - left);
+}
+function receiptLine(label, value, n){
+  const valStr = String(value);
+  return padRight(label, Math.max(0, n - valStr.length)) + valStr;
+}
+function stripAccents(s){
+  return String(s).normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
+function buildReceiptText(sale){
+  const W = RECEIPT_WIDTH;
+  const methodLabel = PAYMENT_METHODS.find(m => m.id === sale.method)?.label || sale.method;
+  const dt = new Date(sale.date);
+  const L = [];
+
+  L.push(centerText(stripAccents('Linsa Salon de Beaute'), W));
+  L.push(centerText('Recu #' + sale.id, W));
+  L.push(centerText(dt.toLocaleDateString('fr-FR') + ' ' + dt.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}), W));
+  L.push('-'.repeat(W));
+
+  sale.items.forEach(i => {
+    L.push(receiptLine(stripAccents(i.qty + ' x ' + i.name), formatHTG(i.price * i.qty), W));
+  });
+
+  L.push('-'.repeat(W));
+  L.push(receiptLine('Sou Total', formatHTG(sale.subtotal), W));
+  L.push(receiptLine('Remiz', '-' + formatHTG(sale.discount), W));
+  L.push(receiptLine('TOTAL', formatHTG(sale.total), W));
+  L.push('-'.repeat(W));
+  L.push(receiptLine(stripAccents('Mod Peman'), methodLabel, W));
+  if(sale.method === 'cash'){
+    L.push(receiptLine('Resevwa', formatHTG(sale.received), W));
+    L.push(receiptLine('Monnen', formatHTG(sale.change), W));
+  }
+  L.push(receiptLine(stripAccents('Kesye'), stripAccents(sale.cashier), W));
+  L.push('');
+  L.push(centerText(stripAccents('Mesi pou vizit ou!'), W));
+  L.push(centerText(stripAccents('Linsa Salon de Beaute'), W));
+  L.push(centerText(stripAccents('Rue Albert Jode, Siloe #69'), W));
+  L.push(centerText('Delmas 75', W));
+  L.push(centerText('38896200 / 34616287', W));
+  L.push('');
+  L.push('');
+
+  return L.join('\n');
+}
+
+function b64EncodeUtf8(str){
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (m, p1) => String.fromCharCode('0x' + p1)));
+}
+
+function printReceiptRawBT(){
+  if(!lastSale){ showToast('Pa gen reçu pou enprime'); return; }
+  const text = buildReceiptText(lastSale);
+  window.location.href = 'rawbt:base64,' + b64EncodeUtf8(text);
+}
+
 function showReceipt(sale){
   document.getElementById('screen-receipt').classList.add('active');
   const methodLabel = PAYMENT_METHODS.find(m=>m.id===sale.method)?.label || sale.method;
@@ -1313,8 +1383,13 @@ function showReceipt(sale){
     <div class="receipt-line"><span>Kesyè</span><span>${sale.cashier}</span></div>
     <div class="receipt-foot">Mèsi pou vizit ou!<br>Linsa Salon de Beauté<br>Rue Albert Jode, Siloe #69, Delmas 75<br>📞 38896200 / 34616287</div>
     <div class="receipt-actions">
-      <button class="btn-print" onclick="window.print()">🖨️ Enprime</button>
+      <button class="btn-print" onclick="printReceiptRawBT()">🖨️ Enprime</button>
       <button class="btn-newsale" onclick="startNewSale()">Nouvo Vant</button>
+    </div>
+    <div style="text-align:center;margin-top:10px;">
+      <a href="#" onclick="window.print();return false;" style="font-size:.75rem;color:var(--text-dim);">
+        Pa gen RawBT? Enprime via navigatè a
+      </a>
     </div>
   `;
 }
