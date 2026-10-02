@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Pwenntaj — Linsa Salon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.js"></script>
+<style>
+:root{
+  --noir-prune:#161210;
+  --or:#E0189A;
+  --or-clair:#FF6FC4;
+  --blanc-rose:#FBF3EC;
+  --panel:#241E19;
+  --panel-2:#2E2620;
+  --line:#3A2E24;
+  --text:#FBF3EC;
+  --text-dim:#C9B8A8;
+  --success:#4CAF7D;
+  --danger:#D9455F;
+  --radius:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;}
+html,body{height:100%;overflow:hidden;}
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--noir-prune);
+  color:var(--text);
+  display:flex;flex-direction:column;
+}
+
+.topbar{
+  flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;
+  padding:16px 22px;background:var(--panel);border-bottom:1px solid var(--line);
+}
+.topbar .brand{font-family:'Playfair Display',serif;font-weight:800;color:var(--or);font-size:1.2rem;}
+.topbar .clock{font-size:1rem;color:var(--text-dim);font-variant-numeric:tabular-nums;}
+
+.main{flex:1;display:flex;overflow:hidden;}
+
+.cam-col{flex:1;position:relative;background:#000;display:flex;align-items:center;justify-content:center;}
+#video{width:100%;height:100%;object-fit:cover;}
+.scan-frame{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:min(60vw,320px);height:min(60vw,320px);
+  border:3px solid var(--or);border-radius:20px;
+  box-shadow:0 0 0 2000px rgba(0,0,0,.45);
+}
+.scan-hint{
+  position:absolute;bottom:28px;left:0;right:0;text-align:center;
+  color:var(--blanc-rose);font-size:.95rem;text-shadow:0 2px 6px rgba(0,0,0,.6);
+}
+.cam-error{
+  max-width:360px;text-align:center;color:var(--text-dim);padding:24px;font-size:.9rem;line-height:1.5;
+}
+
+.log-col{
+  width:320px;flex:0 0 auto;background:var(--panel);border-left:1px solid var(--line);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.log-col h3{padding:16px 18px 10px;font-size:1rem;border-bottom:1px solid var(--line);}
+.log-list{flex:1;overflow-y:auto;padding:10px 14px;}
+.log-item{
+  display:flex;justify-content:space-between;align-items:center;gap:8px;
+  padding:10px 0;border-bottom:1px solid var(--line);font-size:.85rem;
+}
+.log-item:last-child{border-bottom:none;}
+.log-item .who{font-weight:600;}
+.log-item .type{font-size:.72rem;padding:3px 8px;border-radius:12px;white-space:nowrap;}
+.type-antre{background:rgba(76,175,125,.18);color:var(--success);}
+.type-soti{background:rgba(217,69,95,.18);color:var(--danger);}
+.type-soti_manje,.type-retou_manje{background:rgba(224,24,154,.18);color:var(--or-clair);}
+.log-item .time{color:var(--text-dim);font-size:.78rem;white-space:nowrap;}
+.log-empty{color:var(--text-dim);text-align:center;padding:40px 10px;font-size:.85rem;}
+
+/* ============ KONFIMASYON ============ */
+.confirm-overlay{
+  position:fixed;inset:0;background:rgba(10,4,8,.88);display:none;
+  align-items:center;justify-content:center;z-index:50;
+}
+.confirm-overlay.show{display:flex;}
+.confirm-card{
+  width:92%;max-width:420px;background:var(--panel);border:2px solid var(--or);border-radius:var(--radius);
+  padding:40px 32px;text-align:center;
+}
+.confirm-icon{font-size:3.4rem;}
+.confirm-name{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:800;margin-top:14px;}
+.confirm-type{font-size:1.1rem;font-weight:700;color:var(--or);margin-top:8px;}
+.confirm-time{font-size:1rem;color:var(--text-dim);margin-top:4px;}
+.confirm-err{color:var(--danger);font-size:1rem;margin-top:12px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">Linsa Salon — Pwenntaj</div>
+  <div class="clock" id="clock">--:--</div>
+</div>
+
+<div class="main">
+  <div class="cam-col">
+    <video id="video" autoplay playsinline muted></video>
+    <canvas id="canvas" style="display:none;"></canvas>
+    <div class="scan-frame" id="scan-frame"></div>
+    <div class="scan-hint">Mete kat QR ou nan kare a</div>
+    <div class="cam-error hidden" id="cam-error"></div>
+  </div>
+  <div class="log-col">
+    <h3>Pwenntaj Jodi a</h3>
+    <div class="log-list" id="log-list">
+      <div class="log-empty">Pa gen pwenntaj jodi a toujou.</div>
+    </div>
+  </div>
+</div>
+
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-card" id="confirm-card"></div>
+</div>
+
+<script src="firebase-config.js"></script>
+<script>
+const TYPE_LABELS = {
+  antre: { label: 'ANTRE', icon: '✅', color: 'antre' },
+  soti_manje: { label: 'SOTI POU MANJE', icon: '🍽️', color: 'soti_manje' },
+  retou_manje: { label: 'RETOU MANJE', icon: '↩️', color: 'retou_manje' },
+  soti: { label: 'SOTI', icon: '🚪', color: 'soti' }
+};
+const TYPE_SEQUENCE = ['antre', 'soti_manje', 'retou_manje', 'soti'];
+
+let lastScannedCode = null;
+let lastScanTime = 0;
+let scanLocked = false;
+let punchesUnsub = null;
+
+function todayDateKey(){
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function updateClock(){
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+/* ============================================================
+   KAMERA + ESKANE QR
+============================================================ */
+async function startCamera(){
+  const video = document.getElementById('video');
+  const errBox = document.getElementById('cam-error');
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+    });
+    video.srcObject = stream;
+    requestAnimationFrame(scanLoop);
+  } catch(e){
+    console.error('Kamera erè:', e);
+    document.getElementById('scan-frame').style.display = 'none';
+    errBox.classList.remove('hidden');
+    errBox.textContent = 'Pa ka louvri kamera a. Verifye pèmisyon kamera Chrome genyen pou sit sa a (Paramèt → Sit → Kamera), epi rafrechi paj la.';
+  }
+}
+
+function scanLoop(){
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+  if(video.readyState === video.HAVE_ENOUGH_DATA){
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const code = jsQR(imageData.data, imageData.width, imageData.height);
+    if(code && code.data){
+      handleScan(code.data);
+    }
+  }
+  requestAnimationFrame(scanLoop);
+}
+
+async function handleScan(data){
+  if(scanLocked) return;
+  const now = Date.now();
+  if(data === lastScannedCode && (now - lastScanTime) < 8000) return; // anpeche doub-eskane
+  if(!data.startsWith('LINSA-PUNCH|')) return;
+
+  const parts = data.split('|');
+  if(parts.length < 3) return;
+  const employeeId = parts[1];
+  const employeeName = parts.slice(2).join('|');
+
+  lastScannedCode = data;
+  lastScanTime = now;
+  scanLocked = true;
+
+  await processPunch(employeeId, employeeName);
+
+  setTimeout(() => { scanLocked = false; }, 2500);
+}
+
+/* ============================================================
+   LOJIK PWENNTAJ — detèmine pwochen aksyon an
+============================================================ */
+async function processPunch(employeeId, employeeName){
+  if(!linsaFirebaseConfigured()){
+    showConfirm(employeeName, null, 'Sistèm pwenntaj la poko konekte (Firebase pa konfigire). Kontakte administratè a.');
+    return;
+  }
+
+  try{
+    const dateKey = todayDateKey();
+    const todayPunches = await linsaGetEmployeePunchesToday(employeeId, dateKey);
+    const lastType = todayPunches.length ? todayPunches[todayPunches.length - 1].type : null;
+    const lastIndex = lastType ? TYPE_SEQUENCE.indexOf(lastType) : -1;
+    const nextType = TYPE_SEQUENCE[(lastIndex + 1) % TYPE_SEQUENCE.length];
+
+    const now = new Date();
+    await linsaAddPunch({
+      employeeId: employeeId,
+      employeeName: employeeName,
+      type: nextType,
+      dateKey: dateKey,
+      timestamp: now.toISOString()
+    });
+
+    showConfirm(employeeName, nextType, null);
+  } catch(e){
+    console.error('Pwenntaj erè:', e);
+    showConfirm(employeeName, null, 'Erè — pa t ka anrejistre pwenntaj la. Eseye ankò.');
+  }
+}
+
+function showConfirm(name, type, errorMsg){
+  const overlay = document.getElementById('confirm-overlay');
+  const card = document.getElementById('confirm-card');
+  const now = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+
+  if(errorMsg){
+    card.innerHTML = `
+      <div class="confirm-icon">⚠️</div>
+      <div class="confirm-name">${name}</div>
+      <div class="confirm-err">${errorMsg}</div>
+    `;
+  } else {
+    const t = TYPE_LABELS[type];
+    card.innerHTML = `
+      <div class="confirm-icon">${t.icon}</div>
+      <div class="confirm-name">${name}</div>
+      <div class="confirm-type">${t.label}</div>
+      <div class="confirm-time">${now}</div>
+    `;
+  }
+
+  overlay.classList.add('show');
+  setTimeout(() => { overlay.classList.remove('show'); }, 2200);
+}
+
+/* ============================================================
+   LOG PWENNTAJ JODI A
+============================================================ */
+function renderPunchLog(list){
+  const el = document.getElementById('log-list');
+  if(!list || list.length === 0){
+    el.innerHTML = '<div class="log-empty">Pa gen pwenntaj jodi a toujou.</div>';
+    return;
+  }
+  const sorted = list.slice().sort((a,b) => (b.timestamp||'').localeCompare(a.timestamp||''));
+  el.innerHTML = sorted.map(p => {
+    const t = TYPE_LABELS[p.type] || { label: p.type, color: 'antre' };
+    const time = p.timestamp ? new Date(p.timestamp).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}) : '';
+    return `
+      <div class="log-item">
+        <div>
+          <div class="who">${p.employeeName}</div>
+          <span class="type type-${t.color}">${t.label}</span>
+        </div>
+        <div class="time">${time}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function startPunchLogSync(){
+  if(!linsaFirebaseConfigured()) return;
+  if(punchesUnsub) punchesUnsub();
+  punchesUnsub = linsaSubscribePunchesByDate(todayDateKey(), function(list){
+    renderPunchLog(list);
+  });
+}
+
+startCamera();
+startPunchLogSync();
+</script>
+</body>
+</html>

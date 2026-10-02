@@ -153,6 +153,48 @@ async function linsaDeleteEmployee(id){
   await db.collection('employees').doc(id).delete();
 }
 
+/* ============================================================
+   PWENNTAJ (TIMECLOCK) — anplwaye eskane kat QR yo sou tablet la
+============================================================ */
+async function linsaAddPunch(punch){
+  const db = linsaInitFirebase();
+  if(!db) throw new Error('firebase-not-configured');
+  await db.collection('timeclock_punches').add(Object.assign({}, punch, {
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  }));
+}
+
+// Pran tout pwenntaj yon anplwaye (filtre sou yon sèl chan 'employeeId'
+// pou evite yon composite index Firestore), dat jodi a filtre nan JS.
+async function linsaGetEmployeePunchesToday(employeeId, dateKey){
+  const db = linsaInitFirebase();
+  if(!db) return [];
+  const snap = await db.collection('timeclock_punches')
+    .where('employeeId', '==', employeeId)
+    .get();
+  const list = [];
+  snap.forEach(function(doc){ list.push(Object.assign({ id: doc.id }, doc.data())); });
+  return list
+    .filter(function(p){ return p.dateKey === dateKey; })
+    .sort(function(a, b){ return (a.timestamp || '').localeCompare(b.timestamp || ''); });
+}
+
+function linsaSubscribePunchesByDate(dateKey, callback){
+  const db = linsaInitFirebase();
+  if(!db){ callback(null); return function(){}; }
+  return db.collection('timeclock_punches')
+    .where('dateKey', '==', dateKey)
+    .onSnapshot(function(snap){
+      const list = [];
+      snap.forEach(function(doc){ list.push(Object.assign({ id: doc.id }, doc.data())); });
+      list.sort(function(a, b){ return (a.timestamp || '').localeCompare(b.timestamp || ''); });
+      callback(list);
+    }, function(err){
+      console.error('Firebase lekti pwenntaj erè:', err);
+      callback(null);
+    });
+}
+
 function linsaSubscribePayrollPayments(callback){
   const db = linsaInitFirebase();
   if(!db){ callback(null); return function(){}; }

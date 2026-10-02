@@ -25,6 +25,15 @@ rules_version = '2';
      ni piblik la.
 ============================================================ */
 
+function isValidPunch(d) {
+  return d.keys().hasAll(['employeeId', 'employeeName', 'type', 'dateKey', 'timestamp'])
+    && d.employeeId is string && d.employeeId.size() > 0
+    && d.employeeName is string && d.employeeName.size() > 0
+    && d.type in ['antre', 'soti_manje', 'retou_manje', 'soti']
+    && d.dateKey is string && d.dateKey.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+    && d.timestamp is string;
+}
+
 function isValidAppointment(d) {
   return d.keys().hasAll(['name', 'phone', 'date', 'time', 'serviceId'])
     && d.name is string && d.name.size() > 0 && d.name.size() < 120
@@ -56,6 +65,15 @@ service cloud.firestore {
     match /employees/{empId} {
       // Sèlman kont Admin lan gen aksè — pa Kesyè, pa piblik.
       allow read, write: if request.auth != null && request.auth.token.email == 'linsa@linsa-salon.local';
+    }
+
+    match /timeclock_punches/{punchId} {
+      // Estasyon pwenntaj la pa otantifye (li se yon tablet pataje nan
+      // biznis la) — li kreye pwenntaj yo e li li yo pou konnen pwochen
+      // aksyon an (antre/soti), men li pa ka modifye ni efase.
+      allow read: if true;
+      allow create: if isValidPunch(request.resource.data);
+      allow update, delete: if request.auth != null && request.auth.token.email == 'linsa@linsa-salon.local';
     }
 
     match /payroll_payments/{payId} {

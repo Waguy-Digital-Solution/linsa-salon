@@ -112,7 +112,7 @@ input{font-family:inherit;}
   .services-grid{grid-template-columns:repeat(2,1fr);padding-bottom:120px;}
   .cart-col{top:0;width:100%;max-width:100%;}
   .cart-backdrop{top:0;}
-  #view-rendezvous.active,#view-clients.active,#view-rapports.active,#view-payroll.active,#view-admin.active{padding:16px;}
+  #view-rendezvous.active,#view-clients.active,#view-rapports.active,#view-payroll.active,#view-pwenntaj.active,#view-admin.active{padding:16px;}
   .rdv-layout{flex-direction:column;}
   .rdv-form-col{width:100%;}
   .pay-body{flex-direction:column;overflow-y:auto;}
@@ -384,6 +384,8 @@ input{font-family:inherit;}
 #view-rapports.active{display:flex;flex-direction:column;gap:24px;}
 #view-payroll{display:none;flex:1;padding:24px 30px;overflow-y:auto;}
 #view-payroll.active{display:flex;flex-direction:column;gap:20px;}
+#view-pwenntaj{display:none;flex:1;padding:24px 30px;overflow-y:auto;}
+#view-pwenntaj.active{display:flex;flex-direction:column;gap:20px;}
 .kpi-row{display:flex;gap:16px;}
 .kpi-card{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px;}
 .kpi-card .lbl{font-size:.78rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;}
@@ -530,6 +532,7 @@ input{font-family:inherit;}
       <button data-view="clients" onclick="switchView('clients')">👥 Clients</button>
       <button data-view="rapports" onclick="switchView('rapports')" data-admin-only="1">📊 Rapports</button>
       <button data-view="payroll" onclick="switchView('payroll')" data-admin-only="1">💰 Peman Anplwaye</button>
+      <button data-view="pwenntaj" onclick="switchView('pwenntaj')" data-admin-only="1">🕒 Pwenntaj</button>
       <button data-view="admin" onclick="switchView('admin')" data-admin-only="1">⚙️ Admin</button>
     </div>
     <div class="topbar-right">
@@ -682,6 +685,19 @@ input{font-family:inherit;}
       <div class="admin-card">
         <h3>Istorik Peman</h3>
         <div class="payroll-history" id="payroll-history"></div>
+      </div>
+    </div>
+
+    <!-- PWENNTAJ VIEW (Admin sèlman) -->
+    <div id="view-pwenntaj">
+      <div class="admin-card">
+        <h3>🕒 Pwenntaj Anplwaye</h3>
+        <p>Chak anplwaye gen yon kat QR pèsonèl (bouton "🏷️ Kat QR" nan "💰 Peman Anplwaye"). Enstale yon tablet nan biznis la sou paj <b>pwenntaj.html</b> pou anplwaye yo eskane kat yo chak fwa yo antre, soti pou manje, retounen, oswa soti nèt.</p>
+        <button class="btn-primary" style="margin-top:12px;" onclick="window.open('pwenntaj.html','_blank')">📷 Louvri Ekran Eskanè a</button>
+      </div>
+      <div class="admin-card">
+        <h3>Pwenntaj Jodi a</h3>
+        <div class="payroll-history" id="pwenntaj-today-list"></div>
       </div>
     </div>
 
@@ -1022,6 +1038,7 @@ function switchView(view){
   if(view==='admin'){ updateAdminInfo(); startPromosAdminSync(); initDrawerSettingsForm(); }
   if(view==='rendezvous'){ startAppointmentsSync(); renderAppointments(); }
   if(view==='payroll'){ startPayrollSync(); }
+  if(view==='pwenntaj'){ startPwenntajAdminSync(); }
 }
 
 /* ============================================================
@@ -1743,11 +1760,65 @@ function renderEmployeeList(){
       </div>
       <div class="salary">${formatHTG(e.salary || 0)}</div>
       <div class="actions">
+        <button onclick="openBadge('${e.id}','${e.name.replace(/'/g,"\\'")}')">🏷️ Kat QR</button>
         <button onclick="editEmployee('${e.id}')">✎ Modifye</button>
         <button class="del" onclick="deleteEmployee('${e.id}')">Efase</button>
       </div>
     </div>
   `).join('');
+}
+
+function openBadge(id, name){
+  window.open('badge.html?id=' + encodeURIComponent(id) + '&name=' + encodeURIComponent(name), '_blank');
+}
+
+/* ============================================================
+   PWENNTAJ (TIMECLOCK) — vi admin pou wè pwenntaj jodi a
+============================================================ */
+const PWENNTAJ_TYPE_LABELS = {
+  antre: 'Antre',
+  soti_manje: 'Soti pou Manje',
+  retou_manje: 'Retou Manje',
+  soti: 'Soti'
+};
+let pwenntajUnsub = null;
+
+function todayDateKeyLocal(){
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function renderPwenntajToday(list){
+  const el = document.getElementById('pwenntaj-today-list');
+  if(!el) return;
+  if(!list || list.length === 0){
+    el.innerHTML = '<div class="payroll-empty">Pa gen pwenntaj jodi a toujou.</div>';
+    return;
+  }
+  const sorted = list.slice().sort((a,b) => (b.timestamp||'').localeCompare(a.timestamp||''));
+  el.innerHTML = sorted.map(p => {
+    const time = p.timestamp ? new Date(p.timestamp).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}) : '';
+    return `
+      <div class="payroll-history-item">
+        <div>
+          <div class="who">${p.employeeName}</div>
+          <div class="meta">${PWENNTAJ_TYPE_LABELS[p.type] || p.type}</div>
+        </div>
+        <div class="amt">${time}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function startPwenntajAdminSync(){
+  if(!linsaFirebaseConfigured()){
+    renderPwenntajToday([]);
+    return;
+  }
+  if(pwenntajUnsub) return;
+  pwenntajUnsub = linsaSubscribePunchesByDate(todayDateKeyLocal(), function(list){
+    renderPwenntajToday(list || []);
+  });
 }
 
 function populatePayEmployeeSelect(){

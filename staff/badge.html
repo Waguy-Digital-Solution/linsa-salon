@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kat Pwenntaj — Linsa Salon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --noir-prune:#161210;
+  --or:#E0189A;
+  --or-clair:#FF6FC4;
+  --blanc-rose:#FBF3EC;
+  --panel:#241E19;
+  --line:#3A2E24;
+  --text:#FBF3EC;
+  --text-dim:#C9B8A8;
+  --radius:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Inter',sans-serif;
+  background:radial-gradient(circle at 50% 10%, #2A1420 0%, var(--noir-prune) 60%);
+  color:var(--text);
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:24px;
+}
+.card{
+  width:100%;max-width:360px;background:var(--panel);border:1px solid var(--line);
+  border-radius:var(--radius);padding:28px 24px;text-align:center;
+  box-shadow:0 20px 60px rgba(0,0,0,.5);
+}
+.salon{font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:var(--or);}
+.sub{font-size:.72rem;color:var(--text-dim);letter-spacing:3px;text-transform:uppercase;margin-top:2px;}
+.emp-name{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;margin-top:22px;}
+.emp-hint{font-size:.78rem;color:var(--text-dim);margin-top:4px;}
+#qr-box{
+  display:inline-flex;background:var(--blanc-rose);padding:16px;border-radius:12px;margin-top:22px;
+}
+.instructions{
+  margin-top:22px;font-size:.82rem;color:var(--text-dim);line-height:1.5;text-align:left;
+  background:rgba(224,24,154,.08);border:1px solid var(--line);border-radius:10px;padding:14px 16px;
+}
+.instructions b{color:var(--text);}
+.error-box{
+  max-width:360px;text-align:center;background:var(--panel);border:1px solid var(--line);
+  border-radius:var(--radius);padding:28px;color:var(--text-dim);
+}
+.btn-save{
+  display:inline-block;margin-top:18px;padding:12px 22px;border-radius:10px;
+  background:linear-gradient(135deg,var(--or),var(--or-clair));color:#fff;font-weight:700;
+  font-size:.85rem;border:none;cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<div id="content">
+  <div class="error-box">Chaje...</div>
+</div>
+
+<script>
+function getParam(name){
+  return new URLSearchParams(window.location.search).get(name);
+}
+
+(function init(){
+  const id = getParam('id');
+  const name = getParam('name');
+  const content = document.getElementById('content');
+
+  if(!id || !name){
+    content.innerHTML = `
+      <div class="error-box">
+        Pa gen enfòmasyon anplwaye. Louvri lyen sa a depi seksyon
+        "💰 Peman Anplwaye" nan app kès la, bouton "🏷️ Kat QR" sou chak
+        anplwaye.
+      </div>
+    `;
+    return;
+  }
+
+  content.innerHTML = `
+    <div class="card" id="card">
+      <div class="salon">Linsa Salon de Beauté</div>
+      <div class="sub">Kat Pwenntaj</div>
+      <div class="emp-name">${name}</div>
+      <div class="emp-hint">Montre QR sa a bay tablet pwenntaj la</div>
+      <div id="qr-box"></div>
+      <div class="instructions">
+        <b>Kijan pou itilize l:</b><br>
+        1. Fè yon captureekran paj sa a (oswa klike "Sove Imaj" anba a)<br>
+        2. Mete imaj la yon kote fasil pou jwenn sou telefòn ou<br>
+        3. Chak fwa ou <b>antre</b>, <b>soti pou manje</b>, <b>retounen</b>,
+        oswa <b>soti</b> — louvri imaj la epi montre l bay kamera tablet
+        la nan biznis la.
+      </div>
+      <button class="btn-save" onclick="saveAsImage()">💾 Sove Kat la kòm Imaj</button>
+    </div>
+  `;
+
+  new QRCode(document.getElementById('qr-box'), {
+    text: 'LINSA-PUNCH|' + id + '|' + name,
+    width: 200,
+    height: 200,
+    colorDark: '#161210',
+    colorLight: '#FBF3EC',
+    correctLevel: QRCode.CorrectLevel.M
+  });
+})();
+
+function saveAsImage(){
+  const canvas = document.querySelector('#qr-box canvas');
+  if(!canvas){ alert('Pa ka jwenn kòd QR la. Eseye captureekran olye.'); return; }
+  // Konbine kat la antye (non + QR) nan yon sèl imaj pou fasil sove.
+  const card = document.getElementById('card');
+  const name = card.querySelector('.emp-name').textContent;
+  const W = 360, H = 460;
+  const out = document.createElement('canvas');
+  out.width = W; out.height = H;
+  const ctx = out.getContext('2d');
+  ctx.fillStyle = '#241E19';
+  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#E0189A';
+  ctx.font = 'bold 22px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Linsa Salon de Beauté', W/2, 50);
+  ctx.fillStyle = '#FBF3EC';
+  ctx.font = 'bold 26px sans-serif';
+  ctx.fillText(name, W/2, 100);
+  ctx.font = '14px sans-serif';
+  ctx.fillStyle = '#C9B8A8';
+  ctx.fillText('Kat Pwenntaj', W/2, 125);
+  const qrSize = 220;
+  ctx.drawImage(canvas, (W - qrSize) / 2, 150, qrSize, qrSize);
+
+  const link = document.createElement('a');
+  link.download = 'kat-pwenntaj-' + name.replace(/\s+/g, '-').toLowerCase() + '.png';
+  link.href = out.toDataURL('image/png');
+  link.click();
+}
+</script>
+</body>
+</html>
