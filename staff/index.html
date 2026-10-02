@@ -1346,7 +1346,9 @@ function buildReceiptText(sale){
   L.push('');
   L.push('');
 
-  return L.join('\n');
+  // Ranplase espas espesyal (non-breaking/narrow) ki soti nan toLocaleString()
+  // pa yon espas òdinè — anpil enprimant tèmik enprime yo tankou karaktè garbage.
+  return L.join('\n').replace(/[    ]/g, ' ');
 }
 
 function b64EncodeUtf8(str){
