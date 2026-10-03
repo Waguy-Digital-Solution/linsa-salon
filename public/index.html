@@ -207,6 +207,23 @@ a.phone-link:hover{border-bottom-style:solid;}
 }
 .form-note{font-size:.8rem;color:var(--text-dim);margin-top:12px;text-align:center;}
 
+.deposit-box{
+  background:rgba(224,24,154,.07);border:1px solid var(--line);border-radius:12px;
+  padding:16px 18px;margin:4px 0 16px;
+}
+.deposit-title{font-weight:800;font-size:.92rem;color:var(--or);}
+.deposit-steps{font-size:.84rem;color:var(--text-dim);margin-top:8px;line-height:1.5;}
+.deposit-steps ul{margin:6px 0 6px 18px;padding:0;}
+.deposit-steps b{color:var(--text);}
+.deposit-box .form-group{margin-top:12px;}
+.deposit-warning{
+  margin-top:12px;font-size:.8rem;font-weight:700;color:var(--danger);line-height:1.4;
+}
+.success-deposit-note{
+  margin-top:12px;font-size:.82rem;font-weight:700;color:var(--danger);
+  background:rgba(217,69,95,.1);border:1px solid rgba(217,69,95,.3);border-radius:10px;padding:10px 12px;
+}
+
 /* Chan "honeypot" anti-spam — envizib pou moun, men bot yo ranpli l souvan */
 .hp-field{position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0;overflow:hidden;}
 
@@ -307,6 +324,24 @@ footer{text-align:center;padding:24px;color:var(--text-dim);font-size:.8rem;bord
         </div>
       </div>
       <div class="hours-hint" id="hours-hint"></div>
+
+      <div class="deposit-box">
+        <div class="deposit-title">💳 Depo pou Valide Rezèvasyon — <span id="deposit-amount"></span></div>
+        <div class="deposit-steps">
+          Voye <b><span id="deposit-amount-2"></span></b> sou:
+          <ul>
+            <li>MonCash: <b id="deposit-moncash"></b></li>
+            <li>NatCash: <b id="deposit-natcash"></b></li>
+          </ul>
+          Epi antre nimewo tranzaksyon an (referans) anba a.
+        </div>
+        <div class="form-group">
+          <label>Nimewo Tranzaksyon MonCash/NatCash *</label>
+          <input type="text" id="f-payment-ref" placeholder="Egzanp: MP250310.1234.A12345" required>
+        </div>
+        <div class="deposit-warning">⚠️ <span id="deposit-note-text"></span></div>
+      </div>
+
       <div class="form-group">
         <label>Nòt (opsyonèl)</label>
         <textarea id="f-note" rows="3" placeholder="Egzanp: premye vizit, demann espesyal..."></textarea>
@@ -324,6 +359,7 @@ footer{text-align:center;padding:24px;color:var(--text-dim);font-size:.8rem;bord
       <div class="icon">✅</div>
       <h3>Randevou anrejistre!</h3>
       <p>Mèsi! Ekip Linsa Salon ap kontakte w byento pou konfime randevou a.</p>
+      <p class="success-deposit-note">⚠️ <span id="success-deposit-note-text"></span></p>
       <a href="#" id="wa-confirm-btn" class="btn-whatsapp" target="_blank" rel="noopener">💬 Konfime sou WhatsApp Kounye a</a>
       <button onclick="resetForm()">Pran yon lòt randevou</button>
     </div>
@@ -718,9 +754,10 @@ document.getElementById('rdv-form').addEventListener('submit', async function(e)
   const date = document.getElementById('f-date').value;
   const time = document.getElementById('f-time').value;
   const note = document.getElementById('f-note').value.trim();
+  const paymentRef = document.getElementById('f-payment-ref').value.trim();
 
-  if(!name || !phoneRaw || !date || !time){
-    errEl.textContent = 'Tanpri ranpli tout chan obligatwa yo (*).';
+  if(!name || !phoneRaw || !date || !time || !paymentRef){
+    errEl.textContent = 'Tanpri ranpli tout chan obligatwa yo (*), ansanm ak nimewo tranzaksyon depo a.';
     return;
   }
 
@@ -761,12 +798,15 @@ document.getElementById('rdv-form').addEventListener('submit', async function(e)
       date, time,
       status: 'an atant',
       createdBy: 'Kliyan (sit web)',
-      source: 'web'
+      source: 'web',
+      depositAmount: DEPOSIT_AMOUNT,
+      paymentRef: paymentRef
     });
 
     const waText = encodeURIComponent(
       `Bonjou Linsa Salon! Mwen fèk pran yon randevou an liy:\n` +
       `Non: ${name}\nSèvis: ${service ? service.name : ''}\nDat: ${date} — Lè: ${time}\n` +
+      `Depo voye: ${formatHTG(DEPOSIT_AMOUNT)} (referans: ${paymentRef})\n` +
       `Tanpri konfime randevou a. Mèsi!`
     );
     document.getElementById('wa-confirm-btn').href = 'https://wa.me/50938896200?text=' + waText;
@@ -804,12 +844,23 @@ function resetForm(){
   });
 })();
 
+function populateDepositInfo(){
+  const amountTxt = formatHTG(DEPOSIT_AMOUNT);
+  document.getElementById('deposit-amount').textContent = amountTxt;
+  document.getElementById('deposit-amount-2').textContent = amountTxt;
+  document.getElementById('deposit-moncash').textContent = DEPOSIT_MONCASH_NUMBER;
+  document.getElementById('deposit-natcash').textContent = DEPOSIT_NATCASH_NUMBER;
+  document.getElementById('deposit-note-text').textContent = DEPOSIT_NOTE_TEXT;
+  document.getElementById('success-deposit-note-text').textContent = DEPOSIT_NOTE_TEXT;
+}
+
 startPromoSync();
 renderJobs();
 renderHoursDisplay();
 renderCatTabs();
 renderServicesList();
 populateServiceSelect();
+populateDepositInfo();
 document.getElementById('f-date').min = todayStr();
 document.getElementById('f-date').addEventListener('change', updateHoursHint);
 document.getElementById('f-time').addEventListener('change', updateHoursHint);

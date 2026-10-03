@@ -13,7 +13,8 @@ const CATEGORIES = [
   { id:'cheveux',  label:'Cheveux',                     key:'F7' },
   { id:'visage',   label:'Sourcils & Beauté',           key:'F8' },
   { id:'barber',   label:'Barber Shop',                 key:'F9' },
-  { id:'maquillage', label:'Maquillage & Cils',         key:'' }
+  { id:'maquillage', label:'Maquillage & Cils',         key:'' },
+  { id:'depo',     label:'Depo Rezèvasyon',             key:'' }
 ];
 
 /* price: number (fixed) | {min,max} (range) | null (à définir au moment de la vente) */
@@ -97,7 +98,13 @@ const SERVICES = [
   /* ===== MAQUILLAGE & CILS ===== */
   { id:60, cat:'maquillage', name:'Maquillage simple',                   price:3000 },
   { id:61, cat:'maquillage', name:'Maquillage compliqué',                price:4000 },
-  { id:62, cat:'maquillage', name:'Extension cils',                      price:1500 }
+  { id:62, cat:'maquillage', name:'Extension cils',                      price:1500 },
+
+  /* ===== DEPO REZÈVASYON =====
+     Valè a dwe menm ak DEPOSIT_AMOUNT nan site-content.js. Sèvi ak
+     atik sa a nan Kès la lè yon kliyan vin peye depo l an pèsòn — reçu
+     a ap enprime ak nòt "pa ranbousab" la otomatikman. */
+  { id:63, cat:'depo', name:'Depo Rezèvasyon (pa ranbousab)',            price:500 }
 ];
 
 function servicePriceLabel(s){

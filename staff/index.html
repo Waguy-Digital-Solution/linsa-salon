@@ -309,6 +309,10 @@ input{font-family:inherit;}
 .receipt-divider{border-top:1px dashed #d9b78e;margin:10px 0;}
 .receipt-total{display:flex;justify-content:space-between;font-weight:800;font-size:1.05rem;padding:8px 0;}
 .receipt-foot{text-align:center;font-size:.75rem;color:#8a6f52;margin-top:14px;}
+.receipt-deposit-note{
+  text-align:center;font-size:.78rem;font-weight:800;color:var(--danger);
+  margin-top:6px;line-height:1.4;
+}
 .receipt-actions{display:flex;gap:10px;margin-top:20px;}
 .receipt-actions button{flex:1;padding:14px;border-radius:10px;font-weight:700;font-size:.9rem;}
 .btn-print{background:var(--noir-prune);color:var(--blanc-rose);}
@@ -345,6 +349,11 @@ input{font-family:inherit;}
   padding:16px 18px;margin-bottom:12px;display:flex;align-items:center;gap:16px;
 }
 .rdv-card.today{border-color:var(--or);}
+.rdv-deposit-ref{font-size:.75rem;color:var(--success);margin-top:3px;}
+.rdv-deposit-reminder{
+  font-size:.76rem;font-weight:700;color:var(--danger);margin-top:10px;line-height:1.4;
+  background:rgba(217,69,95,.1);border:1px solid rgba(217,69,95,.3);border-radius:8px;padding:8px 10px;
+}
 .rdv-date-badge{
   width:58px;flex:0 0 auto;text-align:center;background:var(--noir-prune);border-radius:10px;padding:8px 4px;
 }
@@ -599,6 +608,7 @@ input{font-family:inherit;}
             </div>
             <label>Nòt (opsyonèl)</label>
             <input type="text" id="rdv-note" placeholder="Egzanp: premye vizit, demann espesyal...">
+            <div class="rdv-deposit-reminder">⚠️ Rapèl: kliyan an dwe peye depo (500 HTG) pou valide rezèvasyon an. Depo a pa ranbousab, menm si li pa vini.</div>
             <button class="btn-primary" style="margin-top:6px;" onclick="addAppointment()">Ajoute Randevou</button>
           </div>
         </div>
@@ -1328,6 +1338,19 @@ function stripAccents(s){
   return String(s).normalize('NFD').replace(/[̀-ͯ]/g, '');
 }
 
+function wrapTextLines(text, n){
+  const words = String(text).split(' ');
+  const lines = [];
+  let cur = '';
+  words.forEach(w => {
+    const next = cur ? cur + ' ' + w : w;
+    if(next.length > n){ lines.push(cur); cur = w; }
+    else { cur = next; }
+  });
+  if(cur) lines.push(cur);
+  return lines;
+}
+
 function buildReceiptText(sale){
   const W = RECEIPT_WIDTH;
   const methodLabel = PAYMENT_METHODS.find(m => m.id === sale.method)?.label || sale.method;
@@ -1354,6 +1377,12 @@ function buildReceiptText(sale){
     L.push(receiptLine('Monnen', formatHTG(sale.change), W));
   }
   L.push(receiptLine(stripAccents('Kesye'), stripAccents(sale.cashier), W));
+
+  if(sale.items.some(i => i.id === 63)){
+    L.push('-'.repeat(W));
+    wrapTextLines(stripAccents(DEPOSIT_NOTE_TEXT), W).forEach(line => L.push(centerText(line, W)));
+  }
+
   L.push('');
   L.push(centerText(stripAccents('Mesi pou vizit ou!'), W));
   L.push(centerText(stripAccents('Linsa Salon de Beaute'), W));
@@ -1400,6 +1429,10 @@ function showReceipt(sale){
       <div class="receipt-line"><span>Monnen</span><span>${formatHTG(sale.change)}</span></div>
     ` : ''}
     <div class="receipt-line"><span>Kesyè</span><span>${sale.cashier}</span></div>
+    ${sale.items.some(i => i.id === 63) ? `
+      <div class="receipt-divider"></div>
+      <div class="receipt-deposit-note">⚠️ ${DEPOSIT_NOTE_TEXT}</div>
+    ` : ''}
     <div class="receipt-foot">Mèsi pou vizit ou!<br>Linsa Salon de Beauté<br>Rue Albert Jode, Siloe #69, Delmas 75<br>📞 38896200 / 34616287</div>
     <div class="receipt-actions">
       <button class="btn-print" onclick="printReceiptRawBT()">🖨️ Enprime</button>
@@ -1538,6 +1571,7 @@ function renderAppointments(){
         <div class="rdv-info">
           <div class="name">${a.name}${a.phone ? ' · ' + a.phone : ''}</div>
           <div class="meta">${a.serviceName}${a.note ? ' — ' + a.note : ''}${a.source ? ' · ' + a.source : ''}</div>
+          ${a.paymentRef ? `<div class="rdv-deposit-ref">💳 Depo ${formatHTG(a.depositAmount || DEPOSIT_AMOUNT)} — Ref: ${a.paymentRef}</div>` : ''}
         </div>
         <div class="rdv-time">${a.time}</div>
         <button class="rdv-del" onclick="deleteAppointment('${a.id}')">✕</button>

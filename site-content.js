@@ -25,6 +25,14 @@ const BUSINESS_HOURS = {
    yon fwa yo gen orè pi presi pou chak sèvis, ranplase valè sa a. */
 const DEFAULT_SERVICE_DURATION_MIN = 45;
 
+/* DEPO REZÈVASYON — montan kliyan dwe voye pa MonCash/NatCash pou
+   valide yon randevou pran an liy. Pa ranbousab (gade nòt sou fòm
+   rezèvasyon an ak sou reçu yo). Chanje valè a si Linsa vle ajiste l. */
+const DEPOSIT_AMOUNT = 500;
+const DEPOSIT_MONCASH_NUMBER = '38896200';
+const DEPOSIT_NATCASH_NUMBER = '34616287';
+const DEPOSIT_NOTE_TEXT = 'Lajan rezèvasyon w bay la pa ranbousab, menm si w pa vini.';
+
 /* ESPAS PIB — pwomosyon/anons.
    Chak slide ka: 'gradient' (koulè, pa gen bezwen imaj),
    'image' (yon foto — bay 'src'), oswa 'video' (yon klip — bay 'src').

@@ -40,7 +40,9 @@ function isValidAppointment(d) {
     && d.phone is string && d.phone.size() > 0 && d.phone.size() < 40
     && d.date is string && d.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
     && d.time is string && d.time.matches('^[0-9]{2}:[0-9]{2}$')
-    && (!('note' in d) || (d.note is string && d.note.size() < 500));
+    && (!('note' in d) || (d.note is string && d.note.size() < 500))
+    && (!('paymentRef' in d) || (d.paymentRef is string && d.paymentRef.size() < 120))
+    && (!('depositAmount' in d) || d.depositAmount is number);
 }
 
 service cloud.firestore {
